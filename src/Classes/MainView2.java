@@ -25,7 +25,8 @@ public class MainView2 extends VBox {
                 ExerciseModel finalExerciseModel = exerciseModel;
                 languageItem.setOnAction(event -> {
                     try {
-                        List<String> exercises = finalExerciseModel.getExercisesForLanguage(language);
+                        List<String> exercises;
+                        exercises = finalExerciseModel.getExercisesForLanguage(language);
                         // Afficher les exercices dans la TextArea
                         // codeInput.setText(exercises.toString());
                     } catch (SQLException e) {

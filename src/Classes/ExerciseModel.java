@@ -9,9 +9,8 @@ public class ExerciseModel {
 
     public ExerciseModel() throws SQLException, ClassNotFoundException {
         try{
-            Class.forName("com.mysql.jdbc.Driver");
             connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/exercises_db?useSSL=false", "root", "");
-        } catch (ClassNotFoundException e){
+        } catch (SQLException e){
             System.err.println("Erreur lors du chargement du pilote JDBC MySQL : " + e.getMessage());
         }
 
@@ -24,7 +23,7 @@ public class ExerciseModel {
         ResultSet resultSet = statement.executeQuery("SELECT DISTINCT code_languages FROM exercises");
 
         while (resultSet.next()) {
-            languages.add(resultSet.getString("langage"));
+            languages.add(resultSet.getString("code_languages"));
         }
 
         statement.close();
@@ -33,7 +32,8 @@ public class ExerciseModel {
 
     public List<String> getExercisesForLanguage(String language) throws SQLException {
         List<String> exercises = new ArrayList<>();
-        PreparedStatement preparedStatement = connection.prepareStatement("SELECT description FROM exercises WHERE code_languages = ?");
+        PreparedStatement preparedStatement;
+        preparedStatement = connection.prepareStatement("SELECT description FROM exercises WHERE code_languages = ?");
         preparedStatement.setString(1, language);
         ResultSet resultSet = preparedStatement.executeQuery();
 
