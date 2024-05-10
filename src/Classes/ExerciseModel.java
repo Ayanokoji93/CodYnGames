@@ -21,7 +21,7 @@ public class ExerciseModel {
     public List<String> getLanguages() throws SQLException {
         List<String> languages = new ArrayList<>();
         Statement statement = connection.createStatement();
-        ResultSet resultSet = statement.executeQuery("SELECT DISTINCT code_langage FROM exercices");
+        ResultSet resultSet = statement.executeQuery("SELECT DISTINCT code_languages FROM exercises");
 
         while (resultSet.next()) {
             languages.add(resultSet.getString("langage"));
@@ -33,7 +33,7 @@ public class ExerciseModel {
 
     public List<String> getExercisesForLanguage(String language) throws SQLException {
         List<String> exercises = new ArrayList<>();
-        PreparedStatement preparedStatement = connection.prepareStatement("SELECT description FROM Exercices WHERE code_langage = ?");
+        PreparedStatement preparedStatement = connection.prepareStatement("SELECT description FROM exercises WHERE code_languages = ?");
         preparedStatement.setString(1, language);
         ResultSet resultSet = preparedStatement.executeQuery();
 
