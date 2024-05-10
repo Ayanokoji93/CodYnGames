@@ -8,10 +8,12 @@ public class Main {
     public static void main(String[] args){
 
         try{
+            Class.forName("com.mysql.jdbc.Driver");
+
             Connection co = DriverManager.getConnection("jdbc:mysql://localhost:3306/exercises_db?useSSL=false", "root", "");
             Statement stmt = co.createStatement();
 
-            ResultSet res = stmt.executeQuery("SELECT * FROM exercises");
+            ResultSet res = stmt.executeQuery("SELECT * FROM Exercises");
 
             while(res.next()){
                 String title = res.getString("title");
@@ -28,6 +30,8 @@ public class Main {
         }
         catch (SQLException e){
             System.err.println(e.getMessage());
+        } catch (ClassNotFoundException e) {
+            System.err.println("Erreur lors du chargement du pilote JDBC MySQL : " + e.getMessage());
         }
     }
 }
