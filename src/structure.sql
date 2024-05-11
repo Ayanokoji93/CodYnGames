@@ -7,19 +7,19 @@ USE exercises_db;
 
 
 
-CREATE TABLE Exercises (
+CREATE TABLE exercises (
     exercise_id INT AUTO_INCREMENT PRIMARY KEY,
     title VARCHAR(100),
     description TEXT,
-    code_languages TEXT
+    code_languages VARCHAR(100)
 );
 
-CREATE TABLE ProgrammingLanguages (
+CREATE TABLE programmingLanguages (
     language_id INT AUTO_INCREMENT PRIMARY KEY,
     language_name VARCHAR(50)
 );
 
-CREATE TABLE UserAttempts (
+CREATE TABLE userattempts (
     attempt_id INT AUTO_INCREMENT PRIMARY KEY,
     exercise_id INT,
     user_id INT,
@@ -32,7 +32,7 @@ CREATE TABLE UserAttempts (
     FOREIGN KEY (language_id) REFERENCES ProgrammingLanguages(language_id)
 );
 
-CREATE TABLE TestCases (
+CREATE TABLE testcases (
     testcase_id INT AUTO_INCREMENT PRIMARY KEY,
     exercise_id INT,
     input_data TEXT,
@@ -40,7 +40,7 @@ CREATE TABLE TestCases (
     FOREIGN KEY (exercise_id) REFERENCES Exercises(exercise_id)
 );
 
-CREATE TABLE ExerciseStats (
+CREATE TABLE exercisestats (
     exercise_id INT PRIMARY KEY,
     attempts INT,
     successes INT,
