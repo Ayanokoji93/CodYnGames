@@ -4,9 +4,8 @@ import java.io.*;
 import java.util.Scanner;
 
 public class JavaFile {
-    private File tempFile;
+    private final File tempFile;
     private String response;
-    private String fileName;
 
     public JavaFile() throws IOException {
         this.tempFile = File.createTempFile("temp", ".java", new File("C:\\Users\\Fayçal\\Desktop\\JavaProject\\CodYnGames\\tempFile"));
@@ -21,17 +20,6 @@ public class JavaFile {
             str.append(line).append("\n");
         }
         response = str.toString();
-
-        int indexBrace = response.indexOf("{");
-        int indexSpace = response.lastIndexOf(" ", indexBrace);
-        String word = response.substring(indexSpace + 1, indexBrace);
-        fileName = word;
-    }
-
-    public boolean renameFile(){
-        File newFileName = new File(tempFile.getParent() + "\\" + fileName + ".java");
-        this.tempFile = newFileName;
-        return tempFile.renameTo(newFileName);
     }
 
     public void writeResponseInFile(String response) throws IOException{
@@ -41,10 +29,8 @@ public class JavaFile {
     }
 
     public String getResponseInFile() throws IOException {
-        Process compilerProcess = Runtime.getRuntime().exec("javac " + getPathFile());
-
-        Process execProcess = Runtime.getRuntime().exec("java " + getPathFile());
-        BufferedReader inputReader = new BufferedReader(new InputStreamReader(execProcess.getInputStream()));
+        Process process = Runtime.getRuntime().exec("javac " + getPathFile());
+        BufferedReader inputReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
         StringBuilder inputOut = new StringBuilder();
         String line;
         while((line = inputReader.readLine()) != null){
@@ -52,7 +38,7 @@ public class JavaFile {
         }
         inputReader.close();
 
-        BufferedReader errorReader = new BufferedReader(new InputStreamReader(execProcess.getErrorStream()));
+        BufferedReader errorReader = new BufferedReader(new InputStreamReader(process.getErrorStream()));
         StringBuilder errorOut = new StringBuilder();
         String line2;
         while((line2 = errorReader.readLine()) != null){
@@ -69,7 +55,6 @@ public class JavaFile {
 
     public void executeJava() throws IOException, InterruptedException {
         askResponse();
-        renameFile();
         writeResponseInFile(getResponse());
         System.out.println(getResponseInFile());
         deleteTempFile();
