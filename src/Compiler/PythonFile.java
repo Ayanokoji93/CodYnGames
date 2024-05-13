@@ -1,5 +1,3 @@
-// This file is used if the language chosen by the user is Python.
-
 package Compiler;
 
 import java.io.*;

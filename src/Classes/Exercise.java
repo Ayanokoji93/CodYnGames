@@ -4,6 +4,7 @@ public class Exercise {
     private String name;
     private String language;
     private String statement;
+    private String code;
 
     public Exercise(String name, String language, String statement){
         this.name = name;
@@ -21,6 +22,10 @@ public class Exercise {
 
     public String getStatement(){
         return statement;
+    }
+
+    public String getCode() {
+        return this.code;
     }
 
     public void setName(String newName){

@@ -45,12 +45,11 @@ public class CFile {
     public void executeC() throws IOException, InterruptedException {
         askResponse();
         writeResponseInFile(response);
-        String command = "C:\\msys64\\mingw64\\bin\\gcc -o tempExecutable " + tempFile.getAbsolutePath();
+        String command = "C:\\msys64\\mingw64\\bin\\gcc -o C:\\Users\\Fayçal\\Desktop\\JavaProject\\CodYnGames\\tempFile\\tempExecutable " + getPathFileC();
         Process compileProcess = Runtime.getRuntime().exec(command);
         compileProcess.waitFor();
-        System.out.println("Chemin du fichier exécutable : " + tempFile.getAbsolutePath());
-        Process executionProcess = Runtime.getRuntime().exec("./tempExecutable");
-        BufferedReader inputReader = new BufferedReader(new InputStreamReader(executionProcess.getInputStream()));
+        Process execProcess = Runtime.getRuntime().exec("C:\\Users\\Fayçal\\Desktop\\JavaProject\\CodYnGames\\tempFile\\tempExecutable");
+        BufferedReader inputReader = new BufferedReader(new InputStreamReader(execProcess.getInputStream()));
         StringBuilder inputOut = new StringBuilder();
         String line;
         while ((line = inputReader.readLine()) != null) {
