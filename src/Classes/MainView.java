@@ -18,6 +18,7 @@ public class MainView extends VBox {
 
     private Label exerciseDescriptionLabel;
     private Map<String, String> languageTextMap;
+    private Label resultLabel;
 
     public MainView(double spacing) {
         super(spacing);
@@ -35,6 +36,9 @@ public class MainView extends VBox {
 
         TextArea codeInput = new TextArea();
         codeInput.setWrapText(true);
+
+        resultLabel = new Label();
+        resultLabel.setWrapText(true);
 
         MenuButton exerciseMenuButton = new MenuButton("Choisir un exercice");
         MenuButton languageMenuButton = new MenuButton("Choisir un langage");
@@ -67,7 +71,8 @@ public class MainView extends VBox {
                 exerciseMenuButton.getItems().add(exerciseMenuItem);
             }
             buttonsBox.getChildren().addAll(exerciseMenuButton,languageMenuButton);
-            labelBox.getChildren().addAll(exerciseDescriptionLabel,codeInput);
+            labelBox.getChildren().addAll(exerciseDescriptionLabel,codeInput,resultLabel);
+
             components.addAll(buttonsBox,labelBox);
 
         } catch (SQLException e) {

@@ -2,18 +2,17 @@ package Compiler;
 
 import java.io.*;
 
-
-public class PhpFile {
+public class JavaScriptFile {
     private final File tempFile;
     private String response;
 
-    public PhpFile() throws IOException {
-        this.tempFile = File.createTempFile("temp", ".php", new File("C:\\Users\\Fayçal\\Desktop\\JavaProject\\CodYnGames\\tempFile"));
+    public JavaScriptFile() throws IOException {
+        this.tempFile = File.createTempFile("temp", ".js", new File("C:\\Users\\Fayçal\\Desktop\\JavaProject\\CodYnGames\\tempFile"));
     }
 
     public void askResponse() throws IOException {
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-        System.out.println("Write your PHP code below (end input with an empty line):");
+        System.out.println("Write your JavaScript code below (end input with an empty line):");
         StringBuilder str = new StringBuilder();
         String line;
         while ((line = reader.readLine()) != null && !line.isEmpty()) {
@@ -34,11 +33,11 @@ public class PhpFile {
         }
     }
 
-    public void executePhp() throws IOException, InterruptedException {
+    public void executeJavaScript() throws IOException, InterruptedException {
         askResponse();
         writeResponseInFile();
-        String phpExecutable = "C:\\PHP\\php.exe";
-        String command = phpExecutable + " " + getPathFilePhp();
+        String nodeExecutable = "C:\\Program Files\\nodejs\\node.exe ";
+        String command = nodeExecutable + getPathFileJs();
         Process execProcess = Runtime.getRuntime().exec(command);
         execProcess.waitFor();
         BufferedReader inputReader = new BufferedReader(new InputStreamReader(execProcess.getInputStream()));
@@ -52,9 +51,8 @@ public class PhpFile {
         deleteTempFile();
     }
 
-    public String getPathFilePhp() {
+    public String getPathFileJs() {
         return tempFile.getAbsolutePath();
     }
+
 }
-
-

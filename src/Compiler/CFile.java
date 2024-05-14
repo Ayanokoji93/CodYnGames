@@ -40,6 +40,9 @@ public class CFile {
 
     public void deleteTempFile() {
         this.tempFile.delete();
+        String execFilePath = "C:\\Users\\Fayçal\\Desktop\\JavaProject\\CodYnGames\\tempFile\\tempExecutable";
+        File execFile = new File(execFilePath);
+        execFile.delete();
     }
 
     public void executeC() throws IOException, InterruptedException {

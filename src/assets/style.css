@@ -1,0 +1,57 @@
+.root {
+    -fx-background-color: #FFFFFF;
+    -fx-alignment: CENTER;
+    -fx-spacing: 30px;
+
+}
+
+
+.text-area {
+    -fx-control-inner-background: #89CFF0;
+    -fx-pref-height: 300px;
+    -fx-pref-width: 200px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+
+/* Choisir un exercice */
+.menu-button {
+    -fx-background-color: #89CFF0;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 6;
+}
+
+.menu-button:hover {
+    -fx-background-color: #A4D3EE;
+    -fx-font-weight: bold;
+    -fx-underline: true;
+}
+
+/* Choisir un langage */
+.menu-button {
+    -fx-background-color: #89CFF0;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 6;
+}
+
+.menu-button:hover {
+    -fx-background-color: #A4D3EE;
+    -fx-font-weight: bold;
+    -fx-underline: true;
+}
+
+/* Soumettre */
+.button {
+    -fx-background-color: #89CFF0;
+    -fx-font-weight: bold;
+    -fx-background-radius: 6;
+}
+
+.button:hover {
+    -fx-background-color: #A4D3EE;
+    -fx-font-weight: bold;
+    -fx-underline: true;
+}
