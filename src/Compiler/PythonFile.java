@@ -22,14 +22,75 @@ public class PythonFile {
         response = str.toString();
     }
 
-    public void writeResponseInFile(String response) throws IOException{
-        BufferedWriter writer = new BufferedWriter(new FileWriter(this.tempFile));
-        writer.write(response);
-        writer.close();
+    public void writeResponseInFile(String response) throws IOException {
+        if (response != null) {
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter(this.tempFile))) {
+                writer.write(response);
+            }
+        } else {
+            System.out.println("Response is null, skipping writing to file.");
+        }
     }
 
-    public String getResponseInFile() throws IOException {
+    public void deleteTempFile(){
+        this.tempFile.delete();
+    }
 
+    public String executePython(String code) throws IOException, InterruptedException {
+
+        writeResponseInFile(code);
+
+        // First part displays normal input of the python code
+        Process execProcess = Runtime.getRuntime().exec("python " + getPathFile());
+        BufferedReader inputReader = new BufferedReader(new InputStreamReader(execProcess.getInputStream()));
+        StringBuilder inputOut = new StringBuilder();
+        String line;
+        while ((line = inputReader.readLine()) != null) {
+            inputOut.append(line).append("\n");
+        }
+        inputReader.close();
+
+        // Second part displays errors of the python code
+        BufferedReader errorReader = new BufferedReader(new InputStreamReader(execProcess.getErrorStream()));
+        StringBuilder errorOut = new StringBuilder();
+        String line2;
+        while((line2 = errorReader.readLine()) != null){
+            errorOut.append(line2).append("\n");
+        }
+        errorReader.close();
+
+        return inputOut.toString() + errorOut.toString();
+
+        // deleteTempFile();
+
+
+    }
+
+    public String getResponse(){
+        return response;
+    }
+
+    public File getTempFile(){
+        return this.tempFile;
+    }
+
+    public String getPathFile(){
+        return tempFile.getAbsolutePath();
+    }
+}
+
+
+
+
+    /*public String executePython(String code) throws IOException, InterruptedException {
+        askResponse();
+        writeResponseInFile(getResponse());
+        System.out.println(getResponseInFile());
+        deleteTempFile();
+        return code;
+    }*/
+
+ /*public String getResponseInFile() throws IOException {
         // First part display the output of python if there is no error.
         Process process = Runtime.getRuntime().exec("python " + getPathFile());
         BufferedReader inputReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
@@ -50,28 +111,5 @@ public class PythonFile {
         errorReader.close();
 
         return inputOut.toString() + errorOut.toString();
-    }
+    }*/
 
-    public void deleteTempFile(){
-        this.tempFile.delete();
-    }
-
-    public void executePython() throws IOException, InterruptedException {
-        askResponse();
-        writeResponseInFile(getResponse());
-        System.out.println(getResponseInFile());
-        deleteTempFile();
-    }
-
-    public String getResponse(){
-        return response;
-    }
-
-    public File getTempFile(){
-        return this.tempFile;
-    }
-
-    public String getPathFile(){
-        return tempFile.getAbsolutePath();
-    }
-}

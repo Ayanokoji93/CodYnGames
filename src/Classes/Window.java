@@ -1,11 +1,13 @@
 package Classes;
 
+import Compiler.*;
 import javafx.collections.ObservableList;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.util.Pair;
 
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.HashMap;
@@ -14,13 +16,13 @@ import java.util.Map;
 import javafx.scene.Node; 
 
 
-public class MainView extends VBox {
+public class Window extends VBox {
 
     private Label exerciseDescriptionLabel;
     private Map<String, String> languageTextMap;
     private Label resultLabel;
 
-    public MainView(double spacing) {
+    public Window(double spacing) {
         super(spacing);
 
         ObservableList<Node> components = this.getChildren();
@@ -46,7 +48,7 @@ public class MainView extends VBox {
         languageTextMap = new HashMap<>();
         languageTextMap.put("Java", "public class Main {\n\tpublic static void main(String[] args) {\n\t\tSystem.out.println(\"Hello, you chose Java!\");\n\t}\n}");
         languageTextMap.put("Python", "print('Hello, you chose Python!')");
-        languageTextMap.put("JavaScript", "console.log('Hello, you chose JavaScript!')");
+        languageTextMap.put("JavaScript", "console.log('Hello, you chose JavaScript!');");
         languageTextMap.put("C", "#include <stdio.h>\n\nint main() {\n\tprintf(\"Hello, you chose C!\");\n\treturn 0;\n}");
         languageTextMap.put("PHP", "<?php\n\techo 'Hello, you chose PHP!';\n?>");
 
@@ -91,8 +93,38 @@ public class MainView extends VBox {
 
         Button submitButton = new Button("Soumettre");
         submitButton.setOnAction(event -> {
-            String code = codeInput.getText();
-            System.out.println("Code soumis : " + code);
+            String code = codeInput.getText(); // Récupère le code depuis la TextArea
+            String langageChoisi = languageMenuButton.getText();
+
+
+            try {
+                switch (langageChoisi) {
+                    case "C":
+                        CFile cFile = new CFile();
+                        resultLabel.setText(cFile.executeC(code));
+                        break;
+                    case "Python":
+                        PythonFile pythonFile = new PythonFile();
+                        resultLabel.setText(pythonFile.executePython(code));
+                        break;
+                    case "PHP":
+                        PhpFile phpFile = new PhpFile();
+                        resultLabel.setText(phpFile.executePhp(code));
+                        break;
+                    case "JavaScript":
+                        JavaScriptFile javascriptFile = new JavaScriptFile();
+                        resultLabel.setText(javascriptFile.executeJavaScript(code));
+                        break;
+                    case "Java":
+                        JavaFile javaFile = new JavaFile();
+                        resultLabel.setText(javaFile.executeJava(code));
+                        break;
+                    default:
+                        resultLabel.setText("Langage non pris en charge");
+                }
+            } catch (IOException | InterruptedException e) {
+                e.printStackTrace(); // Gère les exceptions
+            }
         });
 
         components.add(submitButton);

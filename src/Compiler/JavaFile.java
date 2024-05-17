@@ -35,12 +35,16 @@ public class JavaFile {
     }
 
     public void writeResponseInFile(String response) throws IOException{
-        BufferedWriter writer = new BufferedWriter(new FileWriter(this.tempFile));
-        writer.write(response);
-        writer.close();
+        if (response != null) {
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter(this.tempFile))) {
+                writer.write(response);
+            }
+        } else {
+            System.out.println("Response is null, skipping writing to file.");
+        }
     }
 
-    public String getResponseInFile() throws IOException {
+  /*  public String getResponseInFile() throws IOException {
         Process compilerProcess = Runtime.getRuntime().exec("javac " + getPathFile());
 
         Process execProcess = Runtime.getRuntime().exec("java " + getPathFile());
@@ -60,19 +64,40 @@ public class JavaFile {
         }
         errorReader.close();
 
+        deleteTempFile();
+
         return inputOut.toString() + errorOut.toString();
-    }
+    }*/
 
     public void deleteTempFile(){
         this.tempFile.delete();
     }
 
-    public void executeJava() throws IOException, InterruptedException {
-        askResponse();
+    public String executeJava(String code) throws IOException, InterruptedException {
         renameFile();
-        writeResponseInFile(getResponse());
-        System.out.println(getResponseInFile());
+        writeResponseInFile(code);
+        Process compilerProcess = Runtime.getRuntime().exec("javac " + getPathFile());
+
+        Process execProcess = Runtime.getRuntime().exec("java " + getPathFile());
+        BufferedReader inputReader = new BufferedReader(new InputStreamReader(execProcess.getInputStream()));
+        StringBuilder inputOut = new StringBuilder();
+        String line;
+        while((line = inputReader.readLine()) != null){
+            inputOut.append(line).append("\n");
+        }
+        inputReader.close();
+
+        BufferedReader errorReader = new BufferedReader(new InputStreamReader(execProcess.getErrorStream()));
+        StringBuilder errorOut = new StringBuilder();
+        String line2;
+        while((line2 = errorReader.readLine()) != null){
+            errorOut.append(line2).append("\n");
+        }
+        errorReader.close();
+
         deleteTempFile();
+
+        return inputOut.toString() + errorOut.toString();
     }
 
     public String getResponse(){

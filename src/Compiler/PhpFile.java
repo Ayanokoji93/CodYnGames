@@ -2,7 +2,6 @@ package Compiler;
 
 import java.io.*;
 
-
 public class PhpFile {
     private final File tempFile;
     private String response;
@@ -22,7 +21,10 @@ public class PhpFile {
         response = str.toString();
     }
 
-    public void writeResponseInFile() throws IOException {
+    public void writeResponseInFile(String response) throws IOException {
+        if (response == null || response.isEmpty()) {
+            throw new IllegalArgumentException("Response cannot be null or empty");
+        }
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(this.tempFile))) {
             writer.write(response);
         }
@@ -34,7 +36,38 @@ public class PhpFile {
         }
     }
 
-    public void executePhp() throws IOException, InterruptedException {
+    public String executePhp(String code) throws IOException, InterruptedException {
+
+        writeResponseInFile(code);
+
+        String phpExecutable = "C:\\PHP\\php.exe"; // Chemin de l'exécutable PHP
+        String command = phpExecutable + " " + getPathFilePhp();
+        Process execProcess = Runtime.getRuntime().exec(command);
+        execProcess.waitFor();
+
+        BufferedReader inputReader = new BufferedReader(new InputStreamReader(execProcess.getInputStream()));
+        StringBuilder inputOut = new StringBuilder();
+        String line;
+        while ((line = inputReader.readLine()) != null) {
+            inputOut.append(line).append("\n");
+        }
+        inputReader.close();
+
+
+        deleteTempFile();
+
+
+        return inputOut.toString();
+    }
+
+    public String getPathFilePhp() {
+        return tempFile.getAbsolutePath();
+    }
+
+    public String getResponse(){ return this.response; }
+}
+
+   /* public String executePhp(String code) throws IOException, InterruptedException {
         askResponse();
         writeResponseInFile();
         String phpExecutable = "C:\\PHP\\php.exe";
@@ -50,11 +83,9 @@ public class PhpFile {
         inputReader.close();
         System.out.println(inputOut.toString());
         deleteTempFile();
-    }
+        return phpExecutable;
+    }*/
 
-    public String getPathFilePhp() {
-        return tempFile.getAbsolutePath();
-    }
-}
+
 
 

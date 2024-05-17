@@ -21,9 +21,13 @@ public class JavaScriptFile {
         response = str.toString();
     }
 
-    public void writeResponseInFile() throws IOException {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(this.tempFile))) {
-            writer.write(response);
+    public void writeResponseInFile(String response) throws IOException {
+        if (response != null) {
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter(this.tempFile))) {
+                writer.write(response);
+            }
+        } else {
+            System.out.println("Response is null, skipping writing to file.");
         }
     }
 
@@ -33,13 +37,17 @@ public class JavaScriptFile {
         }
     }
 
-    public void executeJavaScript() throws IOException, InterruptedException {
-        askResponse();
-        writeResponseInFile();
-        String nodeExecutable = "C:\\Program Files\\nodejs\\node.exe ";
-        String command = nodeExecutable + getPathFileJs();
+    public String executeJavaScript(String code) throws IOException, InterruptedException {
+        writeResponseInFile(code);
+
+
+        String nodeExecutable = "C:\\Program Files\\nodejs\\node.exe";
+        String command = nodeExecutable + " " + getPathFileJs();
+
+
         Process execProcess = Runtime.getRuntime().exec(command);
         execProcess.waitFor();
+
         BufferedReader inputReader = new BufferedReader(new InputStreamReader(execProcess.getInputStream()));
         StringBuilder inputOut = new StringBuilder();
         String line;
@@ -47,9 +55,19 @@ public class JavaScriptFile {
             inputOut.append(line).append("\n");
         }
         inputReader.close();
-        System.out.println(inputOut.toString());
+
+        BufferedReader errorReader = new BufferedReader(new InputStreamReader(execProcess.getErrorStream()));
+        StringBuilder errorOut = new StringBuilder();
+        while ((line = errorReader.readLine()) != null) {
+            errorOut.append(line).append("\n");
+        }
+        errorReader.close();
+
         deleteTempFile();
+
+        return inputOut.toString() + errorOut.toString();
     }
+
 
     public String getPathFileJs() {
         return tempFile.getAbsolutePath();
