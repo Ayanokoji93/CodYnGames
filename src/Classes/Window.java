@@ -2,9 +2,9 @@ package Classes;
 
 import Compiler.*;
 import javafx.collections.ObservableList;
+import javafx.geometry.Pos;
 import javafx.scene.control.*;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.util.Pair;
 
 import java.io.IOException;
@@ -13,8 +13,7 @@ import java.util.List;
 import java.util.HashMap;
 import java.util.Map;
 
-import javafx.scene.Node; 
-
+import javafx.scene.Node;
 
 public class Window extends VBox {
 
@@ -24,13 +23,15 @@ public class Window extends VBox {
 
     public Window(double spacing) {
         super(spacing);
-
-        ObservableList<Node> components = this.getChildren();
+        this.setAlignment(Pos.CENTER);
 
         HBox buttonsBox = new HBox();
+        buttonsBox.getStyleClass().add("buttons-box");
         buttonsBox.setSpacing(10);
 
+
         VBox labelBox = new VBox();
+        labelBox.getStyleClass().add("label-box");
         labelBox.setSpacing(10);
 
         exerciseDescriptionLabel = new Label();
@@ -38,6 +39,7 @@ public class Window extends VBox {
 
         TextArea codeInput = new TextArea();
         codeInput.setWrapText(true);
+        codeInput.getStyleClass().add("text-area");
 
         resultLabel = new Label();
         resultLabel.setWrapText(true);
@@ -57,7 +59,7 @@ public class Window extends VBox {
             exerciseModel = new ExerciseModel();
             List<Pair<String, String>> exercisesAndLanguages = exerciseModel.getLanguagesForExercise();
 
-            // Création du menu d'exercices
+
             for (Pair<String, String> pair : exercisesAndLanguages) {
                 String exerciseTitle = pair.getKey();
                 String language = pair.getValue();
@@ -73,9 +75,14 @@ public class Window extends VBox {
                 exerciseMenuButton.getItems().add(exerciseMenuItem);
             }
             buttonsBox.getChildren().addAll(exerciseMenuButton,languageMenuButton);
-            labelBox.getChildren().addAll(exerciseDescriptionLabel,codeInput,resultLabel);
+            labelBox.getChildren().add(exerciseDescriptionLabel);
 
-            components.addAll(buttonsBox,labelBox);
+            VBox textAreaContainer = new VBox(codeInput);
+            textAreaContainer.getStyleClass().add("text-area-container");
+            textAreaContainer.setAlignment(Pos.CENTER);
+            VBox.setVgrow(textAreaContainer, Priority.ALWAYS);
+
+            this.getChildren().addAll(buttonsBox, labelBox, textAreaContainer, resultLabel);
 
         } catch (SQLException e) {
             e.printStackTrace();
@@ -93,9 +100,8 @@ public class Window extends VBox {
 
         Button submitButton = new Button("Soumettre");
         submitButton.setOnAction(event -> {
-            String code = codeInput.getText(); // Récupère le code depuis la TextArea
+            String code = codeInput.getText();
             String langageChoisi = languageMenuButton.getText();
-
 
             try {
                 switch (langageChoisi) {
@@ -123,11 +129,11 @@ public class Window extends VBox {
                         resultLabel.setText("Langage non pris en charge");
                 }
             } catch (IOException | InterruptedException e) {
-                e.printStackTrace(); // Gère les exceptions
+                e.printStackTrace();
             }
         });
 
-        components.add(submitButton);
+        this.getChildren().add(submitButton);
     }
 
     private void updateLanguageMenu(MenuButton languageMenuButton, String selectedExercise, List<Pair<String, String>> exercisesAndLanguages, TextArea codeInput) {
@@ -173,5 +179,4 @@ public class Window extends VBox {
             e.printStackTrace();
         }
     }
-
 }

@@ -20,7 +20,11 @@ public class PythonFile {
             str.append(line).append("\n");
         }
         response = str.toString();
+        System.out.println("Python Input: " + response);
     }
+
+
+
 
     public void writeResponseInFile(String response) throws IOException {
         if (response != null) {
