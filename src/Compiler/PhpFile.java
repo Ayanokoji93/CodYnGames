@@ -66,26 +66,3 @@ public class PhpFile {
 
     public String getResponse(){ return this.response; }
 }
-
-   /* public String executePhp(String code) throws IOException, InterruptedException {
-        askResponse();
-        writeResponseInFile();
-        String phpExecutable = "C:\\PHP\\php.exe";
-        String command = phpExecutable + " " + getPathFilePhp();
-        Process execProcess = Runtime.getRuntime().exec(command);
-        execProcess.waitFor();
-        BufferedReader inputReader = new BufferedReader(new InputStreamReader(execProcess.getInputStream()));
-        StringBuilder inputOut = new StringBuilder();
-        String line;
-        while ((line = inputReader.readLine()) != null) {
-            inputOut.append(line).append("\n");
-        }
-        inputReader.close();
-        System.out.println(inputOut.toString());
-        deleteTempFile();
-        return phpExecutable;
-    }*/
-
-
-
-

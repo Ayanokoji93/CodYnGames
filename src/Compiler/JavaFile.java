@@ -73,6 +73,50 @@ public class JavaFile {
         this.tempFile.delete();
     }
 
+    @Override
+    public String exercisesWNumber(String number1, String number2) throws IOException, InterruptedException {
+        writeResponseInFile(response);
+
+        ProcessBuilder pb = new ProcessBuilder("javac " , getPathFile());
+        pb.redirectErrorStream(true);
+        Process compilerProcess = pb.start();
+        int compileResult = compilerProcess.waitFor();
+        if (compileResult != 0) {
+            deleteTempFile();
+            return "Compilation Error:\n";
+        }
+
+        String className = getPathFile().replace(".java", "");
+        pb = new ProcessBuilder("java", className);
+        pb.redirectErrorStream(true);
+        Process execProcess = pb.start();
+
+        try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(execProcess.getOutputStream()))) {
+            writer.write(number1);
+            writer.newLine();
+            writer.write(number2);
+            writer.newLine();
+            writer.flush();
+        }
+
+        StringBuilder output = new StringBuilder();
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(execProcess.getInputStream()))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                output.append(line).append("\n");
+            }
+        }
+
+        deleteTempFile();
+
+        return output.toString().trim();
+    }
+
+
+
+
+
+
     public String executeJava(String code) throws IOException, InterruptedException {
         renameFile();
         writeResponseInFile(code);

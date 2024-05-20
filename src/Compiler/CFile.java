@@ -1,48 +1,28 @@
 package Compiler;
 
+import Compiler.factor.GeneralCompiler;
+
 import java.io.*;
 
-public class CFile {
-    private final File tempFile;
-    private String response;
+public class CFile extends GeneralCompiler {
 
     public CFile() throws IOException {
-        this.tempFile = File.createTempFile("temp", ".c", new File("C:\\Users\\Fayçal\\Desktop\\JavaProject\\CodYnGames\\tempFile"));
+        super(".c");
     }
 
-    public void askResponse() throws IOException {
-        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-        System.out.println("Write your answer below :");
-        StringBuilder str = new StringBuilder();
-        String line;
-        while ((line = reader.readLine()) != null && !line.isEmpty()) {
-            str.append(line).append("\n");
-        }
-        response = str.toString();
-    }
-
-    public void writeResponseInFile(String response) throws IOException {
-        if (response != null) {
-            try (BufferedWriter writer = new BufferedWriter(new FileWriter(this.tempFile))) {
-                writer.write(response);
-            }
-        } else {
-            System.out.println("Response is null, skipping writing to file.");
-        }
-    }
-
-    public void deleteTempFile() {
-        this.tempFile.delete();
-        String execFilePath = "C:\\Users\\Fayçal\\Desktop\\JavaProject\\CodYnGames\\tempFile\\tempExecutable";
+    private void deleteTempExecFile() {
+        String execFilePath = "C:\\Users\\Fayçal\\Desktop\\JavaProject\\CodYnGames\\tempFile\\tempExecutable.exe";
         File execFile = new File(execFilePath);
-        execFile.delete();
+        if (execFile.exists()) {
+            execFile.delete();
+        }
     }
 
-    public String executeC(String code) throws IOException, InterruptedException {
-
+    @Override
+    public String execute(String code) throws IOException, InterruptedException {
         writeResponseInFile(code);
 
-        String compileCommand = "C:\\msys64\\mingw64\\bin\\gcc -o C:\\Users\\Fayçal\\Desktop\\JavaProject\\CodYnGames\\tempFile\\tempExecutable " + getPathFileC();
+        String compileCommand = "C:\\msys64\\mingw64\\bin\\gcc.exe -o C:\\Users\\Fayçal\\Desktop\\JavaProject\\CodYnGames\\tempFile\\tempExecutable " + getPathFile();
         Process compileProcess = Runtime.getRuntime().exec(compileCommand);
 
         BufferedReader compileErrorReader = new BufferedReader(new InputStreamReader(compileProcess.getErrorStream()));
@@ -55,11 +35,11 @@ public class CFile {
 
         int compileResult = compileProcess.waitFor();
         if (compileResult != 0) {
+            deleteTempFile();
             return "Compilation Error:\n" + compileErrorOut.toString();
         }
 
         Process execProcess = Runtime.getRuntime().exec("C:\\Users\\Fayçal\\Desktop\\JavaProject\\CodYnGames\\tempFile\\tempExecutable");
-
 
         BufferedReader inputReader = new BufferedReader(new InputStreamReader(execProcess.getInputStream()));
         StringBuilder inputOut = new StringBuilder();
@@ -68,28 +48,28 @@ public class CFile {
         }
         inputReader.close();
 
-        BufferedReader errorReader = new BufferedReader(new InputStreamReader(execProcess.getErrorStream()));
-        StringBuilder errorOut = new StringBuilder();
-        while ((line = errorReader.readLine()) != null) {
-            errorOut.append(line).append("\n");
-        }
-        errorReader.close();
-
-        int execResult = execProcess.waitFor();
-        if (execResult != 0) {
-            return "Runtime Error:\n" + errorOut.toString();
-        }
+        deleteTempExecFile();
+        deleteTempFile();
 
         return inputOut.toString();
-
     }
 
     public String getResponse(){
         return this.response;
     }
 
-    public String getPathFileC(){
-        return tempFile.getAbsolutePath();
+
+        StringBuilder output = new StringBuilder();
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                output.append(line).append("\n");
+            }
+        }
+
+        p.waitFor();
+
+        return output.toString().trim();
     }
 }
 

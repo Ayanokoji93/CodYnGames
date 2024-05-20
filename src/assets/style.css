@@ -1,12 +1,11 @@
 .root {
-    -fx-background-color: #FFFFFF;
+    -fx-background-color: #ffffff;
     -fx-alignment: CENTER;
-    -fx-padding: 20px;
-
 }
 
 .buttons-box {
     -fx-spacing: 20px;
+    -fx-padding: 15px;
 }
 
 .label-box {

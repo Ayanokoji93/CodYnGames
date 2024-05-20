@@ -1,7 +1,6 @@
 package Classes;
 
 import Compiler.*;
-import javafx.collections.ObservableList;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
@@ -12,8 +11,6 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.HashMap;
 import java.util.Map;
-
-import javafx.scene.Node;
 
 public class Window extends VBox {
 
@@ -28,7 +25,6 @@ public class Window extends VBox {
         HBox buttonsBox = new HBox();
         buttonsBox.getStyleClass().add("buttons-box");
         buttonsBox.setSpacing(10);
-
 
         VBox labelBox = new VBox();
         labelBox.getStyleClass().add("label-box");
@@ -59,22 +55,19 @@ public class Window extends VBox {
             exerciseModel = new ExerciseModel();
             List<Pair<String, String>> exercisesAndLanguages = exerciseModel.getLanguagesForExercise();
 
-
             for (Pair<String, String> pair : exercisesAndLanguages) {
                 String exerciseTitle = pair.getKey();
                 String language = pair.getValue();
 
                 MenuItem exerciseMenuItem = new MenuItem(exerciseTitle);
-                ExerciseModel finalExerciseModel = exerciseModel;
                 exerciseMenuItem.setOnAction(event -> {
                     exerciseMenuButton.setText(exerciseTitle);
-                    updateLanguageMenu(languageMenuButton, exerciseTitle, exercisesAndLanguages,codeInput);
+                    updateLanguageMenu(languageMenuButton, exerciseTitle, exercisesAndLanguages, codeInput);
                     updateExerciseDescription(exerciseTitle);
-
                 });
                 exerciseMenuButton.getItems().add(exerciseMenuItem);
             }
-            buttonsBox.getChildren().addAll(exerciseMenuButton,languageMenuButton);
+            buttonsBox.getChildren().addAll(exerciseMenuButton, languageMenuButton);
             labelBox.getChildren().add(exerciseDescriptionLabel);
 
             VBox textAreaContainer = new VBox(codeInput);
@@ -82,7 +75,47 @@ public class Window extends VBox {
             textAreaContainer.setAlignment(Pos.CENTER);
             VBox.setVgrow(textAreaContainer, Priority.ALWAYS);
 
-            this.getChildren().addAll(buttonsBox, labelBox, textAreaContainer, resultLabel);
+            Button submitButton = new Button("Soumettre");
+            submitButton.getStyleClass().add("submit-button");
+            submitButton.setOnAction(event -> {
+                String code = codeInput.getText();
+                String langageChoisi = languageMenuButton.getText();
+
+                try {
+                    switch (langageChoisi) {
+                        case "C":
+                            CFile cFile = new CFile();
+                            resultLabel.setText(cFile.execute(code));
+                            break;
+                        case "Python":
+                            PythonFile pythonFile = new PythonFile();
+                            resultLabel.setText(pythonFile.execute(code));
+                            break;
+                        case "PHP":
+                            PhpFile phpFile = new PhpFile();
+                            resultLabel.setText(phpFile.execute(code));
+                            break;
+                        case "JavaScript":
+                            JavaScriptFile javascriptFile = new JavaScriptFile();
+                            resultLabel.setText(javascriptFile.execute(code));
+                            break;
+                        case "Java":
+                            JavaFile javaFile = new JavaFile();
+                            resultLabel.setText(javaFile.execute(code));
+                            break;
+                        default:
+                            resultLabel.setText("Langage non pris en charge");
+                    }
+                } catch (IOException | InterruptedException e) {
+                    e.printStackTrace();
+                }
+            });
+
+            VBox submissionBox = new VBox(submitButton, resultLabel);
+            submissionBox.setAlignment(Pos.CENTER);
+            submissionBox.setSpacing(10);
+
+            this.getChildren().addAll(buttonsBox, labelBox, textAreaContainer, submissionBox);
 
         } catch (SQLException e) {
             e.printStackTrace();
@@ -97,48 +130,10 @@ public class Window extends VBox {
                 }
             }
         }
-
-        Button submitButton = new Button("Soumettre");
-        submitButton.setOnAction(event -> {
-            String code = codeInput.getText();
-            String langageChoisi = languageMenuButton.getText();
-
-            try {
-                switch (langageChoisi) {
-                    case "C":
-                        CFile cFile = new CFile();
-                        resultLabel.setText(cFile.executeC(code));
-                        break;
-                    case "Python":
-                        PythonFile pythonFile = new PythonFile();
-                        resultLabel.setText(pythonFile.executePython(code));
-                        break;
-                    case "PHP":
-                        PhpFile phpFile = new PhpFile();
-                        resultLabel.setText(phpFile.executePhp(code));
-                        break;
-                    case "JavaScript":
-                        JavaScriptFile javascriptFile = new JavaScriptFile();
-                        resultLabel.setText(javascriptFile.executeJavaScript(code));
-                        break;
-                    case "Java":
-                        JavaFile javaFile = new JavaFile();
-                        resultLabel.setText(javaFile.executeJava(code));
-                        break;
-                    default:
-                        resultLabel.setText("Langage non pris en charge");
-                }
-            } catch (IOException | InterruptedException e) {
-                e.printStackTrace();
-            }
-        });
-
-        this.getChildren().add(submitButton);
     }
 
     private void updateLanguageMenu(MenuButton languageMenuButton, String selectedExercise, List<Pair<String, String>> exercisesAndLanguages, TextArea codeInput) {
         languageMenuButton.getItems().clear();
-
         languageMenuButton.setText("Choisir un langage");
         codeInput.clear();
 

@@ -1,16 +1,13 @@
 package Classes;
 
-import a.*;
-
 import Compiler.*;
 
-import javax.script.ScriptException;
-
+import Compiler.factor.GeneralCompiler;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
-import java.io.*;
+import java.io.IOException;
 import java.util.Scanner;
 
 public class Main extends Application {
@@ -36,42 +33,69 @@ public class Main extends Application {
 
     public static void main(String[] args) throws IOException, InterruptedException {
         launch(args);
-        if (args.length < 2) {
-            System.err.println("Usage: java Main <seed> <mode>");
+        if (args.length < 3) {
+            System.err.println("Usage: java Main <language> <seed> <mode>");
+            System.err.println("language: python, c, java, javascript, php");
             System.err.println("mode: generate or verify");
             return;
         }
 
-        long seed = Long.parseLong(args[0]);
-        String mode = args[1];
+        String language = args[0];
+        long seed = Long.parseLong(args[1]);
+        String mode = args[2];
+
+        GeneralCompiler compiler = null;
+        switch (language.toLowerCase()) {
+            case "python":
+                compiler = new PythonFile();
+                break;
+            case "c":
+                compiler = new CFile();
+                break;
+            case "java":
+                compiler = new JavaFile();
+                break;
+            case "javascript":
+                compiler = new JavaScriptFile();
+                break;
+            case "php":
+                compiler = new PhpFile();
+                break;
+            default:
+                System.err.println("Unknown language. Use python, c, java, javascript, or php.");
+                return;
+        }
 
         if (mode.equals("generate")) {
             String numbers = StdinStdout.generateNumbers(seed);
             System.out.println(numbers);
         } else if (mode.equals("verify")) {
             try {
-                String numbers = StdinStdout.getNumbersForVerification(seed);
-                System.out.println(numbers);
+                String numbers = StdinStdout.generateNumbers(seed);
+                System.out.println("Les nombres à multiplier sont: " + numbers);
 
-                PythonFile pythonFile = new PythonFile();
-                pythonFile.askResponse();
-                String pythonCode = pythonFile.getResponse();
-                String result = pythonFile.executePython(pythonCode);
-                System.out.println("Résultat du Python: " + result);
+                String[] splitNumbers = numbers.split(" ");
+                String number1 = splitNumbers[0];
+                String number2 = splitNumbers[1];
+
+                compiler.askResponse();
+                String result = compiler.exercisesWNumber(number1, number2);
+                System.out.println("Résultat: " + result);
 
                 int userResult = Integer.parseInt(result.trim());
-
                 String verificationMessage = StdinStdout.verifyNumbers(seed, userResult);
+
                 if (verificationMessage.equals("Résultat correct")) {
                     System.out.println(verificationMessage);
                 } else {
                     System.err.println(verificationMessage);
                 }
-
-                pythonFile.deleteTempFile();
-
             } catch (Exception e) {
                 e.printStackTrace();
+            } finally {
+                if (compiler instanceof GeneralCompiler) {
+                    ((GeneralCompiler) compiler).deleteTempFile();
+                }
             }
         } else {
             System.err.println("Mode inconnu. Utilisez 'generate' ou 'verify'.");

@@ -68,6 +68,37 @@ public class JavaScriptFile {
         return inputOut.toString() + errorOut.toString();
     }
 
+    @Override
+    public String exercisesWNumber(String number1, String number2) throws IOException, InterruptedException {
+        writeResponseInFile(response);
+
+        String nodeExecutable = "C:\\Program Files\\nodejs\\node.exe";
+        ProcessBuilder pb = new ProcessBuilder(nodeExecutable, getPathFileJs());
+        pb.redirectErrorStream(true);
+        Process p = pb.start();
+
+        try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(p.getOutputStream()))) {
+            writer.write(number1);
+            writer.newLine();
+            writer.write(number2);
+            writer.newLine();
+            writer.flush();
+        }
+
+        StringBuilder output = new StringBuilder();
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                output.append(line).append("\n");
+            }
+        }
+
+        p.waitFor();
+        deleteTempFile();
+
+        return output.toString().trim();
+    }
+
 
     public String getPathFileJs() {
         return tempFile.getAbsolutePath();
