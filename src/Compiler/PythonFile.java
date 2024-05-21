@@ -41,7 +41,13 @@ public class PythonFile extends GeneralCompiler {
         return inputOut.toString() + errorOut.toString();
     }
 
+    @Override
+    public String exercisesWNumber(String number1, String number2) throws IOException, InterruptedException {
+        writeResponseInFile(response);
 
+        ProcessBuilder pb = new ProcessBuilder("python", getPathFile());
+        pb.redirectErrorStream(true);
+        Process p = pb.start();
 
         try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(p.getOutputStream()))) {
             writer.write(number1);

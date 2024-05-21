@@ -1,5 +1,7 @@
 package Classes;
 
+import java.util.Random;
+
 public class Exercise {
     private String name;
     private String language;
@@ -11,6 +13,7 @@ public class Exercise {
         this.language = language;
         this.statement = statement;
     }
+
 
     public String getName(){
         return name;

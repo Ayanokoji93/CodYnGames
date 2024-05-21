@@ -1,48 +1,23 @@
 package Compiler;
 
+import Compiler.factor.GeneralCompiler;
+
 import java.io.*;
 
-public class JavaScriptFile {
-    private final File tempFile;
-    private String response;
+public class JavaScriptFile extends GeneralCompiler {
+    private String fileName;
 
     public JavaScriptFile() throws IOException {
-        this.tempFile = File.createTempFile("temp", ".js", new File("C:\\Users\\Fayçal\\Desktop\\JavaProject\\CodYnGames\\tempFile"));
+        super(".js");
     }
 
-    public void askResponse() throws IOException {
-        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-        System.out.println("Write your JavaScript code below (end input with an empty line):");
-        StringBuilder str = new StringBuilder();
-        String line;
-        while ((line = reader.readLine()) != null && !line.isEmpty()) {
-            str.append(line).append("\n");
-        }
-        response = str.toString();
-    }
+    @Override
+    public String execute(String code) throws IOException, InterruptedException {
 
-    public void writeResponseInFile(String response) throws IOException {
-        if (response != null) {
-            try (BufferedWriter writer = new BufferedWriter(new FileWriter(this.tempFile))) {
-                writer.write(response);
-            }
-        } else {
-            System.out.println("Response is null, skipping writing to file.");
-        }
-    }
-
-    public void deleteTempFile() {
-        if (this.tempFile.exists()) {
-            this.tempFile.delete();
-        }
-    }
-
-    public String executeJavaScript(String code) throws IOException, InterruptedException {
         writeResponseInFile(code);
 
-
-        String nodeExecutable = "C:\\Program Files\\nodejs\\node.exe";
-        String command = nodeExecutable + " " + getPathFileJs();
+        String nodeExecutable = "C:\\Program Files\\nodejs\\node.exe ";
+        String command = nodeExecutable + getPathFileJs();
 
 
         Process execProcess = Runtime.getRuntime().exec(command);
