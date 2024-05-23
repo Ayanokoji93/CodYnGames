@@ -52,7 +52,7 @@ public class Main extends Application {
         System.out.println("Résultat de l'utilisateur: " + userResult);
         System.out.println("Résultat de la correction: " + correctionResult);
 
-        // Comparaison en ignorant les espaces blancs et la casse
+        
         if (userResult.trim().equalsIgnoreCase(correctionResult.trim())) {
             System.out.println("Résultat correct.");
         } else {
