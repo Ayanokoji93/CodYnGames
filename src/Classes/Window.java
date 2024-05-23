@@ -40,8 +40,8 @@ public class Window extends VBox {
         resultLabel = new Label();
         resultLabel.setWrapText(true);
 
-        MenuButton exerciseMenuButton = new MenuButton("Choisir un exercice");
         MenuButton languageMenuButton = new MenuButton("Choisir un langage");
+        MenuButton exerciseMenuButton = new MenuButton("Choisir un exercice");
 
         languageTextMap = new HashMap<>();
         languageTextMap.put("Java", "public class Main {\n\tpublic static void main(String[] args) {\n\t\tSystem.out.println(\"Hello, you chose Java!\");\n\t}\n}");
@@ -55,19 +55,18 @@ public class Window extends VBox {
             exerciseModel = new ExerciseModel();
             List<Pair<String, String>> exercisesAndLanguages = exerciseModel.getLanguagesForExercise();
 
-            for (Pair<String, String> pair : exercisesAndLanguages) {
-                String exerciseTitle = pair.getKey();
-                String language = pair.getValue();
 
-                MenuItem exerciseMenuItem = new MenuItem(exerciseTitle);
-                exerciseMenuItem.setOnAction(event -> {
-                    exerciseMenuButton.setText(exerciseTitle);
-                    updateLanguageMenu(languageMenuButton, exerciseTitle, exercisesAndLanguages, codeInput);
-                    updateExerciseDescription(exerciseTitle);
+            for (String lang : languageTextMap.keySet()) {
+                MenuItem languageMenuItem = new MenuItem(lang);
+                languageMenuItem.setOnAction(event -> {
+                    languageMenuButton.setText(lang);
+                    codeInput.setText(languageTextMap.get(lang));
+                    updateExerciseMenu(exerciseMenuButton, lang, exercisesAndLanguages, codeInput);
                 });
-                exerciseMenuButton.getItems().add(exerciseMenuItem);
+                languageMenuButton.getItems().add(languageMenuItem);
             }
-            buttonsBox.getChildren().addAll(exerciseMenuButton, languageMenuButton);
+
+            buttonsBox.getChildren().addAll(languageMenuButton, exerciseMenuButton);
             labelBox.getChildren().add(exerciseDescriptionLabel);
 
             VBox textAreaContainer = new VBox(codeInput);
@@ -79,34 +78,34 @@ public class Window extends VBox {
             submitButton.getStyleClass().add("submit-button");
             submitButton.setOnAction(event -> {
                 String code = codeInput.getText();
-                String langageChoisi = languageMenuButton.getText();
+                String selectedLanguage = languageMenuButton.getText();
 
                 try {
-                    switch (langageChoisi) {
+                    switch (selectedLanguage) {
                         case "C":
                             CFile cFile = new CFile();
-                            resultLabel.setText(cFile.execute(code));
+                            //resultLabel.setText(cFile.execute(code));
                             break;
                         case "Python":
                             PythonFile pythonFile = new PythonFile();
-                            resultLabel.setText(pythonFile.execute(code));
+                            //resultLabel.setText(pythonFile.execute(code));
                             break;
                         case "PHP":
                             PhpFile phpFile = new PhpFile();
-                            resultLabel.setText(phpFile.execute(code));
+                            //resultLabel.setText(phpFile.execute(code));
                             break;
                         case "JavaScript":
                             JavaScriptFile javascriptFile = new JavaScriptFile();
-                            resultLabel.setText(javascriptFile.execute(code));
+                            //resultLabel.setText(javascriptFile.execute(code));
                             break;
                         case "Java":
                             JavaFile javaFile = new JavaFile();
-                            resultLabel.setText(javaFile.execute(code));
+                            //resultLabel.setText(javaFile.execute(code));
                             break;
                         default:
                             resultLabel.setText("Langage non pris en charge");
                     }
-                } catch (IOException | InterruptedException e) {
+                } catch (IOException /*| InterruptedException*/ e) {
                     e.printStackTrace();
                 }
             });
@@ -121,6 +120,10 @@ public class Window extends VBox {
             e.printStackTrace();
         } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
         } finally {
             if (exerciseModel != null) {
                 try {
@@ -132,28 +135,22 @@ public class Window extends VBox {
         }
     }
 
-    private void updateLanguageMenu(MenuButton languageMenuButton, String selectedExercise, List<Pair<String, String>> exercisesAndLanguages, TextArea codeInput) {
-        languageMenuButton.getItems().clear();
-        languageMenuButton.setText("Choisir un langage");
-        codeInput.clear();
+    private void updateExerciseMenu(MenuButton exerciseMenuButton, String selectedLanguage, List<Pair<String, String>> exercisesAndLanguages, TextArea codeInput) {
+        exerciseMenuButton.getItems().clear();
+        exerciseMenuButton.setText("Choisir un exercice");
 
         for (Pair<String, String> pair : exercisesAndLanguages) {
             String exerciseTitle = pair.getKey();
-            String language = pair.getValue();
-            if (exerciseTitle.equals(selectedExercise)) {
-                String[] languages = language.split(",");
+            String languages = pair.getValue();
 
-                for (String lang : languages) {
-                    MenuItem languageMenuItem = new MenuItem(lang);
-                    languageMenuItem.setOnAction(event -> {
-                        languageMenuButton.setText(lang);
-                        if (languageTextMap.containsKey(lang)) {
-                            codeInput.setText(languageTextMap.get(lang));
-                        }
-                    });
-                    languageMenuButton.getItems().add(languageMenuItem);
-                }
-                break;
+            if (languages.contains(selectedLanguage)) {
+                MenuItem exerciseMenuItem = new MenuItem(exerciseTitle);
+                exerciseMenuItem.setOnAction(event -> {
+                    exerciseMenuButton.setText(exerciseTitle);
+                    updateExerciseDescription(exerciseTitle);
+                    codeInput.clear();
+                });
+                exerciseMenuButton.getItems().add(exerciseMenuItem);
             }
         }
     }
@@ -172,6 +169,10 @@ public class Window extends VBox {
             }
         } catch (SQLException | ClassNotFoundException e) {
             e.printStackTrace();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
         }
     }
 }

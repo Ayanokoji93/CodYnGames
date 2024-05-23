@@ -53,39 +53,6 @@ public class CFile extends GeneralCompiler {
 
         return inputOut.toString();
     }
-
-    @Override
-    public String exercisesWNumber(String number1, String number2) throws IOException, InterruptedException {
-        writeResponseInFile(response);
-
-        String execPath = "C:\\Users\\Fayçal\\Desktop\\JavaProject\\CodYnGames\\tempFile\\tempExecutable";
-
-        ProcessBuilder pb = new ProcessBuilder(execPath);
-        pb.redirectErrorStream(true);
-        Process p = pb.start();
-
-
-        try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(p.getOutputStream()))) {
-            writer.write(number1);
-            writer.newLine();
-            writer.write(number2);
-            writer.newLine();
-            writer.flush();
-        }
-
-
-        StringBuilder output = new StringBuilder();
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                output.append(line).append("\n");
-            }
-        }
-
-        p.waitFor();
-
-        return output.toString().trim();
-    }
 }
 
 /*public String getResponseFromFile() throws IOException {

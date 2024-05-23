@@ -14,6 +14,45 @@ public class PythonFile extends GeneralCompiler {
     }
 
     @Override
+    public String execute(String code, List<Integer> numbers) throws IOException, InterruptedException {
+        writeResponseInFile(code);
+
+        // Construction de la commande d'exécution
+        ProcessBuilder pb = new ProcessBuilder("python", getPathFile());
+        pb.redirectErrorStream(true); // Rediriger les erreurs vers la sortie standard
+        Process execProcess = pb.start();
+
+        // Écrire les nombres dans l'entrée standard du processus
+        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(execProcess.getOutputStream()));
+        for (Integer number : numbers) {
+            writer.write(number.toString());
+            writer.newLine();
+        }
+        writer.close();
+
+        // Attendre que le processus se termine et récupérer la sortie
+        StringBuilder output = new StringBuilder();
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(execProcess.getInputStream()))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                output.append(line).append(System.lineSeparator());
+            }
+        }
+
+        // Attendre que le processus se termine
+        execProcess.waitFor();
+
+        // Supprimer le fichier temporaire
+        deleteTempFile();
+
+        // Récupérer la sortie standard du processus Python
+        String userResult = output.toString().trim();
+
+        return userResult;
+    }
+}
+
+    @Override
     public String execute(String code) throws IOException, InterruptedException {
 
         writeResponseInFile(code);
@@ -40,35 +79,7 @@ public class PythonFile extends GeneralCompiler {
 
         return inputOut.toString() + errorOut.toString();
     }
-
-    @Override
-    public String exercisesWNumber(String number1, String number2) throws IOException, InterruptedException {
-        writeResponseInFile(response);
-
-        ProcessBuilder pb = new ProcessBuilder("python", getPathFile());
-        pb.redirectErrorStream(true);
-        Process p = pb.start();
-
-        try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(p.getOutputStream()))) {
-            writer.write(number1);
-            writer.newLine();
-            writer.write(number2);
-            writer.newLine();
-            writer.flush();
-        }
-
-        StringBuilder output = new StringBuilder();
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                output.append(line).append("\n");
-            }
-        }
-
-        p.waitFor();
-        return output.toString().trim();
-    }
-}
+}*/
 
 
 

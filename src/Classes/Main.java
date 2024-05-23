@@ -33,72 +33,31 @@ public class Main extends Application {
 
     public static void main(String[] args) throws IOException, InterruptedException {
         launch(args);
-        if (args.length < 3) {
-            System.err.println("Usage: java Main <language> <seed> <mode>");
-            System.err.println("language: python, c, java, javascript, php");
-            System.err.println("mode: generate or verify");
-            return;
+        String generateScriptPath = "C:\\Users\\Fayçal\\Desktop\\JavaProject\\CodYnGames\\correctionFile\\generateNumber.py";
+        String correctionScriptPath = "C:\\Users\\Fayçal\\Desktop\\JavaProject\\CodYnGames\\correctionFile\\correctionMultiply.py";
+
+        StdinStdout generateExecutor = new StdinStdout(generateScriptPath);
+        List<Integer> numbers = generateExecutor.executeScript();
+        for (Integer number : numbers) {
+            System.out.println("Nombre: " + number);
         }
 
-        String language = args[0];
-        long seed = Long.parseLong(args[1]);
-        String mode = args[2];
+        PythonFile executorPythonFile = new PythonFile();
+        executorPythonFile.askResponse();
+        String userResult = executorPythonFile.execute(executorPythonFile.getResponse(), numbers);
 
-        GeneralCompiler compiler = null;
-        switch (language.toLowerCase()) {
-            case "python":
-                compiler = new PythonFile();
-                break;
-            case "c":
-                compiler = new CFile();
-                break;
-            case "java":
-                compiler = new JavaFile();
-                break;
-            case "javascript":
-                compiler = new JavaScriptFile();
-                break;
-            case "php":
-                compiler = new PhpFile();
-                break;
-            default:
-                System.err.println("Unknown language. Use python, c, java, javascript, or php.");
-                return;
-        }
+        StdinStdout correctionExecutor = new StdinStdout(correctionScriptPath);
+        String correctionResult = correctionExecutor.executeScriptWithArgs(numbers);
 
-        if (mode.equals("generate")) {
-            String numbers = StdinStdout.generateNumbers(seed);
-            System.out.println(numbers);
-        } else if (mode.equals("verify")) {
-            try {
-                String numbers = StdinStdout.generateNumbers(seed);
-                System.out.println("Les nombres à multiplier sont: " + numbers);
+        System.out.println("Résultat de l'utilisateur: " + userResult);
+        System.out.println("Résultat de la correction: " + correctionResult);
 
-                String[] splitNumbers = numbers.split(" ");
-                String number1 = splitNumbers[0];
-                String number2 = splitNumbers[1];
-
-                compiler.askResponse();
-                String result = compiler.exercisesWNumber(number1, number2);
-                System.out.println("Résultat: " + result);
-
-                int userResult = Integer.parseInt(result.trim());
-                String verificationMessage = StdinStdout.verifyNumbers(seed, userResult);
-
-                if (verificationMessage.equals("Résultat correct")) {
-                    System.out.println(verificationMessage);
-                } else {
-                    System.err.println(verificationMessage);
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            } finally {
-                if (compiler instanceof GeneralCompiler) {
-                    ((GeneralCompiler) compiler).deleteTempFile();
-                }
-            }
+        // Comparaison en ignorant les espaces blancs et la casse
+        if (userResult.trim().equalsIgnoreCase(correctionResult.trim())) {
+            System.out.println("Résultat correct.");
         } else {
-            System.err.println("Mode inconnu. Utilisez 'generate' ou 'verify'.");
+            System.out.println("Pas attendu ahah t'es trop bête.");
         }
+
     }
 }

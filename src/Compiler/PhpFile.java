@@ -3,6 +3,8 @@ package Compiler;
 import Compiler.factor.GeneralCompiler;
 
 import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class PhpFile extends GeneralCompiler {
     private String fileName;
@@ -12,63 +14,45 @@ public class PhpFile extends GeneralCompiler {
     }
 
     @Override
-    public String execute(String code) throws IOException, InterruptedException {
-
+    public String execute(String code, List<Integer> numbers) throws IOException, InterruptedException {
         writeResponseInFile(code);
 
-        String phpExecutable = "C:\\PHP\\php.exe ";
-        String command = phpExecutable + getPathFile();
-        Process execProcess = Runtime.getRuntime().exec(command);
-        execProcess.waitFor();
-
-        BufferedReader inputReader = new BufferedReader(new InputStreamReader(execProcess.getInputStream()));
-        StringBuilder inputOut = new StringBuilder();
-        String line;
-        while ((line = inputReader.readLine()) != null) {
-            inputOut.append(line).append("\n");
-        }
-        inputReader.close();
-
-        BufferedReader errorReader = new BufferedReader(new InputStreamReader(execProcess.getErrorStream()));
-        StringBuilder errorOut = new StringBuilder();
-        while((line = errorReader.readLine()) != null){
-            errorOut.append(line).append("\n");
-        }
-        errorReader.close();
-
-        deleteTempFile();
-
-        return inputOut.toString() + errorOut.toString();
-    }
-
-    @Override
-    public String exercisesWNumber(String number1, String number2) throws IOException, InterruptedException {
-        writeResponseInFile(response);
-
+        // Chemin vers l'exécutable PHP
         String phpExecutable = "C:\\PHP\\php.exe";
-        ProcessBuilder pb = new ProcessBuilder(phpExecutable, getPathFile());
-        pb.redirectErrorStream(true);
-        Process p = pb.start();
 
-        try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(p.getOutputStream()))) {
-            writer.write(number1);
+        // Construction de la commande d'exécution
+        List<String> command = new ArrayList<>();
+        command.add(phpExecutable);
+        command.add(getPathFile());
+
+        // Exécution de la commande
+        ProcessBuilder pb = new ProcessBuilder(command);
+        Process execProcess = pb.start();
+
+        // Écrire les nombres dans l'entrée standard du processus
+        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(execProcess.getOutputStream()));
+        for (Integer number : numbers) {
+            writer.write(number.toString());
             writer.newLine();
-            writer.write(number2);
-            writer.newLine();
-            writer.flush();
         }
+        writer.close();
 
+        // Attendre que le processus se termine et récupérer la sortie
         StringBuilder output = new StringBuilder();
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()))) {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(execProcess.getInputStream()))) {
             String line;
             while ((line = reader.readLine()) != null) {
-                output.append(line).append("\n");
+                output.append(line).append(System.lineSeparator());
             }
         }
 
-        p.waitFor();
+        // Attendre que le processus se termine
+        execProcess.waitFor();
+
+        // Supprimer le fichier temporaire
         deleteTempFile();
 
-        return output.toString().trim();
+        return output.toString();
     }
+
 }
