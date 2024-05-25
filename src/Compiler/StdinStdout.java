@@ -3,15 +3,28 @@ package Compiler;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
+/**
+ * The StdinStdout class provides methods to execute a Python script,
+ * capture its standard output and error streams, and handle input arguments.
+ */
 public class StdinStdout {
     private String scriptPath;
 
+    /**
+     * Constructor that initializes the script path.
+     *
+     * @param scriptPath the path to the Python script.
+     */
     public StdinStdout(String scriptPath) {
         this.scriptPath = scriptPath;
     }
 
+    /**
+     * Executes the Python script and captures its output as a list of integers.
+     *
+     * @return a list of integers captured from the script's standard output.
+     */
     public List<Integer> executeScript() {
         List<Integer> numbers = new ArrayList<>();
         try {
@@ -20,19 +33,21 @@ public class StdinStdout {
             BufferedReader errorReader = new BufferedReader(new InputStreamReader(process.getErrorStream()));
             String line;
 
+            // Read numbers from the script's output
             while ((line = numberReader.readLine()) != null) {
                 String[] numberStrings = line.split(" ");
                 for (String numStr : numberStrings) {
                     try {
                         numbers.add(Integer.parseInt(numStr));
                     } catch (NumberFormatException e) {
-                        System.err.println("Erreur de format de nombre : " + numStr);
+                        System.err.println("Number format error: " + numStr);
                     }
                 }
             }
 
+            // Read any errors from the script's error stream
             while ((line = errorReader.readLine()) != null) {
-                System.err.println("Erreur du processus : " + line);
+                System.err.println("Process error: " + line);
             }
 
             process.waitFor();
@@ -42,14 +57,19 @@ public class StdinStdout {
         return numbers;
     }
 
+    /**
+     * Executes the Python script with a list of integers as input arguments and captures its output as a string.
+     *
+     * @param numbers the list of integers to pass as input arguments to the script.
+     * @return the output of the executed script.
+     */
     public String executeScriptWithArgs(List<Integer> numbers) {
         StringBuilder output = new StringBuilder();
         try {
-            // Construction de la commande d'exécution
             ProcessBuilder pb = new ProcessBuilder("python", scriptPath);
             Process execProcess = pb.start();
 
-            // Écrire les nombres dans l'entrée standard du processus
+            // Pass the list of numbers to the script as input
             BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(execProcess.getOutputStream()));
             for (Integer number : numbers) {
                 writer.write(number.toString());
@@ -57,7 +77,7 @@ public class StdinStdout {
             }
             writer.close();
 
-            // Attendre que le processus se termine et récupérer la sortie
+            // Capture the output of the executed script
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(execProcess.getInputStream()))) {
                 String line;
                 while ((line = reader.readLine()) != null) {
@@ -65,7 +85,6 @@ public class StdinStdout {
                 }
             }
 
-            // Attendre que le processus se termine
             execProcess.waitFor();
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
