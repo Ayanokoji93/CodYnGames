@@ -1,35 +1,52 @@
 package Compiler;
 
 import Compiler.factor.GeneralCompiler;
-
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * The PhpFile class extends GeneralCompiler and provides methods to write PHP code to a file,
+ * execute it using a PHP interpreter, and manage temporary files.
+ */
 public class PhpFile extends GeneralCompiler {
     private String fileName;
 
+    /**
+     * Constructor that initializes a temporary file with the ".php" extension.
+     *
+     * @throws IOException if an I/O error occurs.
+     */
     public PhpFile() throws IOException {
         super(".php");
     }
 
+    /**
+     * Executes the provided PHP code using a PHP interpreter, passing a list of numbers as input.
+     *
+     * @param code the PHP code to execute.
+     * @param numbers the list of numbers to pass as input to the program.
+     * @return the output of the executed program.
+     * @throws IOException if an I/O error occurs.
+     * @throws InterruptedException if the process execution is interrupted.
+     */
     @Override
     public String execute(String code, List<Integer> numbers) throws IOException, InterruptedException {
         writeResponseInFile(code);
 
-        // Chemin vers l'exécutable PHP
-        String phpExecutable = "C:\\PHP\\php.exe";
+        // Path to the PHP executable
+        String phpExecutable = "C:\\Users\\FiercePC\\Desktop\\php\\php.exe";
 
-        // Construction de la commande d'exécution
+        // Command to execute the PHP file
         List<String> command = new ArrayList<>();
         command.add(phpExecutable);
         command.add(getPathFile());
 
-        // Exécution de la commande
+        // Start the process
         ProcessBuilder pb = new ProcessBuilder(command);
         Process execProcess = pb.start();
 
-        // Écrire les nombres dans l'entrée standard du processus
+        // Pass the list of numbers to the program as input
         BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(execProcess.getOutputStream()));
         for (Integer number : numbers) {
             writer.write(number.toString());
@@ -37,7 +54,7 @@ public class PhpFile extends GeneralCompiler {
         }
         writer.close();
 
-        // Attendre que le processus se termine et récupérer la sortie
+        // Capture the output of the executed program
         StringBuilder output = new StringBuilder();
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(execProcess.getInputStream()))) {
             String line;
@@ -46,13 +63,12 @@ public class PhpFile extends GeneralCompiler {
             }
         }
 
-        // Attendre que le processus se termine
+        // Wait for the process to finish
         execProcess.waitFor();
 
-        // Supprimer le fichier temporaire
+        // Delete the temporary file
         deleteTempFile();
 
         return output.toString();
     }
-
 }
