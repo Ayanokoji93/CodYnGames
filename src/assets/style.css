@@ -1,4 +1,5 @@
 .root {
+
     -fx-alignment: center;
 }
 
@@ -16,6 +17,7 @@
     -fx-pref-height: 600px;
     -fx-max-width: 1800px;
 }
+
 
 .text-area-container {
     -fx-alignment: center;
@@ -74,9 +76,4 @@
 .comment {
     -fx-fill: #4ee266;
     -fx-font-style: italic;
-}
-
-.label {
-    -fx-text-fill: black;
-    -fx-background-color: transparent;
 }
