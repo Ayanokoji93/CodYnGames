@@ -1,91 +1,74 @@
 package Compiler;
 
+import Compiler.factor.GeneralCompiler;
 import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
 
-public class PhpFile {
-    private final File tempFile;
-    private String response;
+/**
+ * The PhpFile class extends GeneralCompiler and provides methods to write PHP code to a file,
+ * execute it using a PHP interpreter, and manage temporary files.
+ */
+public class PhpFile extends GeneralCompiler {
+    private String fileName;
 
+    /**
+     * Constructor that initializes a temporary file with the ".php" extension.
+     *
+     * @throws IOException if an I/O error occurs.
+     */
     public PhpFile() throws IOException {
-        this.tempFile = File.createTempFile("temp", ".php", new File("C:\\Users\\Fayçal\\Desktop\\JavaProject\\CodYnGames\\tempFile"));
+        super(".php");
     }
 
-    public void askResponse() throws IOException {
-        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-        System.out.println("Write your PHP code below (end input with an empty line):");
-        StringBuilder str = new StringBuilder();
-        String line;
-        while ((line = reader.readLine()) != null && !line.isEmpty()) {
-            str.append(line).append("\n");
-        }
-        response = str.toString();
-    }
-
-    public void writeResponseInFile(String response) throws IOException {
-        if (response == null || response.isEmpty()) {
-            throw new IllegalArgumentException("Response cannot be null or empty");
-        }
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(this.tempFile))) {
-            writer.write(response);
-        }
-    }
-
-    public void deleteTempFile() {
-        if (this.tempFile.exists()) {
-            this.tempFile.delete();
-        }
-    }
-
-    public String executePhp(String code) throws IOException, InterruptedException {
-
+    /**
+     * Executes the provided PHP code using a PHP interpreter, passing a list of numbers as input.
+     *
+     * @param code the PHP code to execute.
+     * @param numbers the list of numbers to pass as input to the program.
+     * @return the output of the executed program.
+     * @throws IOException if an I/O error occurs.
+     * @throws InterruptedException if the process execution is interrupted.
+     */
+    @Override
+    public String execute(String code, List<Integer> numbers) throws IOException, InterruptedException {
         writeResponseInFile(code);
 
-        String phpExecutable = "C:\\PHP\\php.exe"; // Chemin de l'exécutable PHP
-        String command = phpExecutable + " " + getPathFilePhp();
-        Process execProcess = Runtime.getRuntime().exec(command);
+        // Path to the PHP executable
+        String phpExecutable = "C:\\Users\\FiercePC\\Desktop\\php\\php.exe";
+
+        // Command to execute the PHP file
+        List<String> command = new ArrayList<>();
+        command.add(phpExecutable);
+        command.add(getPathFile());
+
+        // Start the process
+        ProcessBuilder pb = new ProcessBuilder(command);
+        Process execProcess = pb.start();
+
+        // Pass the list of numbers to the program as input
+        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(execProcess.getOutputStream()));
+        for (Integer number : numbers) {
+            writer.write(number.toString());
+            writer.newLine();
+        }
+        writer.close();
+
+        // Capture the output of the executed program
+        StringBuilder output = new StringBuilder();
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(execProcess.getInputStream()))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                output.append(line).append(System.lineSeparator());
+            }
+        }
+
+        // Wait for the process to finish
         execProcess.waitFor();
 
-        BufferedReader inputReader = new BufferedReader(new InputStreamReader(execProcess.getInputStream()));
-        StringBuilder inputOut = new StringBuilder();
-        String line;
-        while ((line = inputReader.readLine()) != null) {
-            inputOut.append(line).append("\n");
-        }
-        inputReader.close();
-
-
+        // Delete the temporary file
         deleteTempFile();
 
-
-        return inputOut.toString();
+        return output.toString();
     }
-
-    public String getPathFilePhp() {
-        return tempFile.getAbsolutePath();
-    }
-
-    public String getResponse(){ return this.response; }
 }
-
-   /* public String executePhp(String code) throws IOException, InterruptedException {
-        askResponse();
-        writeResponseInFile();
-        String phpExecutable = "C:\\PHP\\php.exe";
-        String command = phpExecutable + " " + getPathFilePhp();
-        Process execProcess = Runtime.getRuntime().exec(command);
-        execProcess.waitFor();
-        BufferedReader inputReader = new BufferedReader(new InputStreamReader(execProcess.getInputStream()));
-        StringBuilder inputOut = new StringBuilder();
-        String line;
-        while ((line = inputReader.readLine()) != null) {
-            inputOut.append(line).append("\n");
-        }
-        inputReader.close();
-        System.out.println(inputOut.toString());
-        deleteTempFile();
-        return phpExecutable;
-    }*/
-
-
-
-

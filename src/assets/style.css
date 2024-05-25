@@ -1,12 +1,10 @@
 .root {
-    -fx-background-color: #FFFFFF;
-    -fx-alignment: CENTER;
-    -fx-padding: 20px;
-
+    -fx-alignment: center;
 }
 
 .buttons-box {
     -fx-spacing: 20px;
+    -fx-padding: 15px;
 }
 
 .label-box {
@@ -20,7 +18,7 @@
 }
 
 .text-area-container {
-    -fx-alignment: CENTER;
+    -fx-alignment: center;
 }
 
 .menu-button {
@@ -36,7 +34,6 @@
     -fx-underline: true;
 }
 
-
 .button {
     -fx-background-color: #89CFF0;
     -fx-font-weight: bold;
@@ -44,8 +41,42 @@
 }
 
 .button:hover {
-    -fx-background-color: #89CFF0;
+    -fx-background-color: #A4D3EE;
     -fx-font-weight: bold;
     -fx-underline: true;
 }
 
+.keyword {
+    -fx-fill: #0480eb;
+    -fx-font-weight: bold;
+}
+
+.paren {
+    -fx-fill: darkgray;
+}
+
+.brace {
+    -fx-fill: darkgray;
+}
+
+.bracket {
+    -fx-fill: darkgray;
+}
+
+.semicolon {
+    -fx-fill: darkgray;
+}
+
+.string {
+    -fx-fill: #e40e0e;
+}
+
+.comment {
+    -fx-fill: #4ee266;
+    -fx-font-style: italic;
+}
+
+.label {
+    -fx-text-fill: black;
+    -fx-background-color: transparent;
+}

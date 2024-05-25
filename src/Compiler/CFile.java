@@ -1,50 +1,53 @@
 package Compiler;
 
+import Compiler.factor.GeneralCompiler;
 import java.io.*;
+import java.util.List;
 
-public class CFile {
-    private final File tempFile;
-    private String response;
+/**
+ * The CFile class extends GeneralCompiler and provides methods to write C code to a file,
+ * compile it, execute it, and manage temporary files.
+ */
+public class CFile extends GeneralCompiler {
 
+    /**
+     *Constructor that initializes a temporary file with the ".c" extension.
+     *
+     * @throws IOException if an I/O error occurs.
+     */
     public CFile() throws IOException {
-        this.tempFile = File.createTempFile("temp", ".c", new File("C:\\Users\\Fayçal\\Desktop\\JavaProject\\CodYnGames\\tempFile"));
+        super(".c");
     }
 
-    public void askResponse() throws IOException {
-        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-        System.out.println("Write your answer below :");
-        StringBuilder str = new StringBuilder();
-        String line;
-        while ((line = reader.readLine()) != null && !line.isEmpty()) {
-            str.append(line).append("\n");
-        }
-        response = str.toString();
-    }
-
-    public void writeResponseInFile(String response) throws IOException {
-        if (response != null) {
-            try (BufferedWriter writer = new BufferedWriter(new FileWriter(this.tempFile))) {
-                writer.write(response);
-            }
-        } else {
-            System.out.println("Response is null, skipping writing to file.");
-        }
-    }
-
-    public void deleteTempFile() {
-        this.tempFile.delete();
-        String execFilePath = "C:\\Users\\Fayçal\\Desktop\\JavaProject\\CodYnGames\\tempFile\\tempExecutable";
+    /**
+     * Deletes the temporary executable file created during the compilation process.
+     */
+    private void deleteTempExecFile() {
+        String execFilePath = "C:\\Users\\FiercePC\\Desktop\\JavaProject\\CodYnGames\\tempFile\\tempExecutable.exe";
         File execFile = new File(execFilePath);
-        execFile.delete();
+        if (execFile.exists()) {
+            execFile.delete();
+        }
     }
 
-    public String executeC(String code) throws IOException, InterruptedException {
-
+    /**
+     * Compiles and executes the provided C code, passing a list of numbers as input.
+     *
+     * @param code the C code to execute.
+     * @param numbers the list of numbers to pass as input to the program.
+     * @return the output of the executed program or compilation errors if any.
+     * @throws IOException if an I/O error occurs.
+     * @throws InterruptedException if the process execution is interrupted.
+     */
+    @Override
+    public String execute(String code, List<Integer> numbers) throws IOException, InterruptedException {
         writeResponseInFile(code);
 
-        String compileCommand = "C:\\msys64\\mingw64\\bin\\gcc -o C:\\Users\\Fayçal\\Desktop\\JavaProject\\CodYnGames\\tempFile\\tempExecutable " + getPathFileC();
+        // Compile the C code
+        String compileCommand = "C:\\Program Files\\mingw64\\bin\\gcc.exe -o C:\\Users\\FiercePC\\Desktop\\JavaProject\\CodYnGames\\tempFile\\tempExecutable " + getPathFile();
         Process compileProcess = Runtime.getRuntime().exec(compileCommand);
 
+        // Capture compilation errors
         BufferedReader compileErrorReader = new BufferedReader(new InputStreamReader(compileProcess.getErrorStream()));
         StringBuilder compileErrorOut = new StringBuilder();
         String line;
@@ -53,54 +56,35 @@ public class CFile {
         }
         compileErrorReader.close();
 
+        // Wait for the compilation process to finish and check the result
         int compileResult = compileProcess.waitFor();
         if (compileResult != 0) {
+            deleteTempFile();
             return "Compilation Error:\n" + compileErrorOut.toString();
         }
 
-        Process execProcess = Runtime.getRuntime().exec("C:\\Users\\Fayçal\\Desktop\\JavaProject\\CodYnGames\\tempFile\\tempExecutable");
+        // Execute the compiled C program
+        Process execProcess = Runtime.getRuntime().exec("C:\\Users\\FiercePC\\Desktop\\JavaProject\\CodYnGames\\tempFile\\tempExecutable");
 
+        // Pass the list of numbers to the program as input
+        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(execProcess.getOutputStream()));
+        for (Integer number : numbers) {
+            writer.write(number.toString());
+            writer.newLine();
+        }
+        writer.close();
 
-        BufferedReader inputReader = new BufferedReader(new InputStreamReader(execProcess.getInputStream()));
+        // Capture the output of the executed program
         StringBuilder inputOut = new StringBuilder();
-        while ((line = inputReader.readLine()) != null) {
-            inputOut.append(line).append("\n");
-        }
-        inputReader.close();
-
-        BufferedReader errorReader = new BufferedReader(new InputStreamReader(execProcess.getErrorStream()));
-        StringBuilder errorOut = new StringBuilder();
-        while ((line = errorReader.readLine()) != null) {
-            errorOut.append(line).append("\n");
-        }
-        errorReader.close();
-
-        int execResult = execProcess.waitFor();
-        if (execResult != 0) {
-            return "Runtime Error:\n" + errorOut.toString();
-        }
-
-        return inputOut.toString();
-
-    }
-
-    public String getResponse(){
-        return this.response;
-    }
-
-    public String getPathFileC(){
-        return tempFile.getAbsolutePath();
-    }
-}
-
-/*public String getResponseFromFile() throws IOException {
-        StringBuilder responseFromFile = new StringBuilder();
-        try (BufferedReader reader = new BufferedReader(new FileReader(this.tempFile))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                responseFromFile.append(line).append("\n");
+        try (BufferedReader inputReader = new BufferedReader(new InputStreamReader(execProcess.getInputStream()))) {
+            while ((line = inputReader.readLine()) != null) {
+                inputOut.append(line).append("\n");
             }
         }
-        return responseFromFile.toString();
-    }*/
 
+        deleteTempExecFile();
+        deleteTempFile();
+
+        return inputOut.toString();
+    }
+}

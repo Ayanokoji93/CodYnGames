@@ -1,16 +1,17 @@
 package Classes;
 
-import a.*;
-
 import Compiler.*;
-
-import javax.script.ScriptException;
+import Compiler.factor.GeneralCompiler;
 
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 public class Main extends Application {
@@ -36,45 +37,55 @@ public class Main extends Application {
 
     public static void main(String[] args) throws IOException, InterruptedException {
         launch(args);
-        if (args.length < 2) {
-            System.err.println("Usage: java Main <seed> <mode>");
-            System.err.println("mode: generate or verify");
-            return;
-        }
 
-        long seed = Long.parseLong(args[0]);
-        String mode = args[1];
+        /*StdinStdout generateExecutor = new StdinStdout("C:\\Users\\FiercePC\\Desktop\\JavaProject\\CodYnGames\\correctionFile\\generateNumberExo4.py");
+        PythonFile test = new PythonFile();
+        test.askResponse();
+        test.writeResponseInFile(test.getResponse());
+        String sourceFilePath = test.getPathFile();
+        String targetFilePath = "C:\\Users\\FiercePC\\Desktop\\JavaProject\\CodYnGames\\mainInclude\\mainExo5.py";
+        test.addContentToFile(targetFilePath);
+        List<Integer> list = generateExecutor.executeScript();
 
-        if (mode.equals("generate")) {
-            String numbers = StdinStdout.generateNumbers(seed);
-            System.out.println(numbers);
-        } else if (mode.equals("verify")) {
-            try {
-                String numbers = StdinStdout.getNumbersForVerification(seed);
-                System.out.println(numbers);
-
-                PythonFile pythonFile = new PythonFile();
-                pythonFile.askResponse();
-                String pythonCode = pythonFile.getResponse();
-                String result = pythonFile.executePython(pythonCode);
-                System.out.println("Résultat du Python: " + result);
-
-                int userResult = Integer.parseInt(result.trim());
-
-                String verificationMessage = StdinStdout.verifyNumbers(seed, userResult);
-                if (verificationMessage.equals("Résultat correct")) {
-                    System.out.println(verificationMessage);
-                } else {
-                    System.err.println(verificationMessage);
-                }
-
-                pythonFile.deleteTempFile();
-
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        } else {
-            System.err.println("Mode inconnu. Utilisez 'generate' ou 'verify'.");
-        }
+        StdinStdout test2 = new StdinStdout(test.getPathFile());
+        System.out.println(test2.executeScriptWithArgs(list));*/
     }
 }
+        /*CFile test2 = new CFile();
+        test2.askResponse();
+        String sourceFilePath2 = "C:\\Users\\FiercePC\\Desktop\\JavaProject\\CodYnGames\\tempFile\\temp.c";
+        String targetFilePath2 = "C:\\Users\\FiercePC\\Desktop\\JavaProject\\CodYnGames\\mainInclude\\mainExo5.c";
+        Include.addContentToFile(sourceFilePath2, targetFilePath2);
+        JavaFile test3 = new JavaFile();
+        test3.askResponse();
+        String sourceFilePath3 = "C:\\Users\\FiercePC\\Desktop\\JavaProject\\CodYnGames\\tempFile\\temp.java";
+        String targetFilePath3 = "C:\\Users\\FiercePC\\Desktop\\JavaProject\\CodYnGames\\mainInclude\\mainExo5.java";
+        Include.addContentToFile(sourceFilePath3, targetFilePath3);
+        JavaScriptFile test4 = new JavaScriptFile();
+        test4.askResponse();
+        String sourceFilePath4 = "C:\\Users\\FiercePC\\Desktop\\JavaProject\\CodYnGames\\tempFile\\temp.py";
+        String targetFilePath4 = "C:\\Users\\FiercePC\\Desktop\\JavaProject\\CodYnGames\\mainInclude\\mainExo5.js";
+        Include.addContentToFile(sourceFilePath4, targetFilePath4);*/
+
+
+        /*StdinStdout generateExecutor = new StdinStdout(generateScriptPath);
+        List<Integer> numbers = generateExecutor.executeScript();
+        for (Integer number : numbers) {
+            System.out.println("Nombre: " + number);
+        }
+
+        PythonFile executorPythonFile = new PythonFile();
+        executorPythonFile.askResponse();
+        String userResult = executorPythonFile.execute(executorPythonFile.getResponse(), numbers);
+
+        StdinStdout correctionExecutor = new StdinStdout(correctionScriptPath);
+        String correctionResult = correctionExecutor.executeScriptWithArgs(numbers);
+
+        System.out.println("Résultat de l'utilisateur: " + userResult);
+        System.out.println("Résultat de la correction: " + correctionResult);
+
+        if (userResult.trim().equalsIgnoreCase(correctionResult.trim())) {
+            System.out.println("Résultat correct.");
+        } else {
+            System.out.println("Pas correct.");
+        }*/

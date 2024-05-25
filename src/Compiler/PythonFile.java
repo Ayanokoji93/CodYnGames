@@ -1,119 +1,73 @@
 package Compiler;
 
+import Compiler.factor.GeneralCompiler;
 import java.io.*;
-import java.util.Scanner;
+import java.util.List;
 
-public class PythonFile {
-    private final File tempFile;
-    private String response;
+/**
+ * The PythonFile class extends GeneralCompiler and provides methods to write Python code to a file,
+ * execute it using a Python interpreter, and manage temporary files.
+ */
+public class PythonFile extends GeneralCompiler {
 
+    private String fileName;
+
+    /**
+     *Constructor that initializes a temporary file with the ".py" extension.
+     *
+     * @throws IOException if an I/O error occurs.
+     */
     public PythonFile() throws IOException {
-        this.tempFile = File.createTempFile("temp", ".py", new File("C:\\Users\\Fayçal\\Desktop\\JavaProject\\CodYnGames\\tempFile"));
+        super(".py");
     }
 
-    public void askResponse(){
-        Scanner scanner = new Scanner(System.in);
-        System.out.println("Write your answer below :");
-        StringBuilder str = new StringBuilder();
-        String line;
-        while(!(line = scanner.nextLine()).isEmpty()){
-            str.append(line).append("\n");
-        }
-        response = str.toString();
-        System.out.println("Python Input: " + response);
+    public PythonFile(String fileName) throws IOException {
+        super(null);
+        this.fileName = fileName;
     }
 
-
-
-
-    public void writeResponseInFile(String response) throws IOException {
-        if (response != null) {
-            try (BufferedWriter writer = new BufferedWriter(new FileWriter(this.tempFile))) {
-                writer.write(response);
-            }
-        } else {
-            System.out.println("Response is null, skipping writing to file.");
-        }
-    }
-
-    public void deleteTempFile(){
-        this.tempFile.delete();
-    }
-
-    public String executePython(String code) throws IOException, InterruptedException {
-
+    /**
+     * Executes the provided Python code using a Python interpreter, passing a list of numbers as input.
+     *
+     * @param code the Python code to execute.
+     * @param numbers the list of numbers to pass as input to the program.
+     * @return the output of the executed program.
+     * @throws IOException if an I/O error occurs.
+     * @throws InterruptedException if the process execution is interrupted.
+     */
+    @Override
+    public String execute(String code, List<Integer> numbers) throws IOException, InterruptedException {
         writeResponseInFile(code);
 
-        // First part displays normal input of the python code
-        Process execProcess = Runtime.getRuntime().exec("python " + getPathFile());
-        BufferedReader inputReader = new BufferedReader(new InputStreamReader(execProcess.getInputStream()));
-        StringBuilder inputOut = new StringBuilder();
-        String line;
-        while ((line = inputReader.readLine()) != null) {
-            inputOut.append(line).append("\n");
+        // Prepare the command to execute the Python file
+        ProcessBuilder pb = new ProcessBuilder("python", getPathFile());
+        pb.redirectErrorStream(true);
+        Process execProcess = pb.start();
+
+        // Pass the list of numbers to the program as input
+        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(execProcess.getOutputStream()));
+        for (Integer number : numbers) {
+            writer.write(number.toString());
+            writer.newLine();
         }
-        inputReader.close();
+        writer.close();
 
-        // Second part displays errors of the python code
-        BufferedReader errorReader = new BufferedReader(new InputStreamReader(execProcess.getErrorStream()));
-        StringBuilder errorOut = new StringBuilder();
-        String line2;
-        while((line2 = errorReader.readLine()) != null){
-            errorOut.append(line2).append("\n");
+        // Capture the output of the executed program
+        StringBuilder output = new StringBuilder();
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(execProcess.getInputStream()))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                output.append(line).append(System.lineSeparator());
+            }
         }
-        errorReader.close();
 
-        return inputOut.toString() + errorOut.toString();
+        // Wait for the process to finish
+        execProcess.waitFor();
+        deleteTempFile();
 
-        // deleteTempFile();
-
-
-    }
-
-    public String getResponse(){
-        return response;
-    }
-
-    public File getTempFile(){
-        return this.tempFile;
-    }
-
-    public String getPathFile(){
-        return tempFile.getAbsolutePath();
+        // Trim the output and return it
+        String userResult = output.toString().trim();
+        return userResult;
     }
 }
-
-
-
-
-    /*public String executePython(String code) throws IOException, InterruptedException {
-        askResponse();
-        writeResponseInFile(getResponse());
-        System.out.println(getResponseInFile());
-        deleteTempFile();
-        return code;
-    }*/
-
- /*public String getResponseInFile() throws IOException {
-        // First part display the output of python if there is no error.
-        Process process = Runtime.getRuntime().exec("python " + getPathFile());
-        BufferedReader inputReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-        StringBuilder inputOut = new StringBuilder();
-        String line;
-        while((line = inputReader.readLine()) != null){
-            inputOut.append(line).append("\n");
-        }
-        inputReader.close();
-
-        // Second part displays errors of the python code
-        BufferedReader errorReader = new BufferedReader(new InputStreamReader(process.getErrorStream()));
-        StringBuilder errorOut = new StringBuilder();
-        String line2;
-        while((line2 = errorReader.readLine()) != null){
-            errorOut.append(line2).append("\n");
-        }
-        errorReader.close();
-
-        return inputOut.toString() + errorOut.toString();
-    }*/
 

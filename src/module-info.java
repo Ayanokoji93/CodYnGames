@@ -3,6 +3,8 @@ module CodYnGames {
     requires javafx.controls;
     requires java.sql;
     requires java.scripting;
+    requires mysql.connector.java;
+    requires org.fxmisc.richtext;
 
     opens Classes;
 }
