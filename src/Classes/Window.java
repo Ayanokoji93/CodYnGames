@@ -1,10 +1,17 @@
 package Classes;
 
 import Compiler.*;
+
 import javafx.geometry.Pos;
+
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
+
 import javafx.util.Pair;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.fxmisc.richtext.CodeArea;
 import org.fxmisc.richtext.LineNumberFactory;
 import org.fxmisc.richtext.model.StyleSpans;
@@ -12,17 +19,21 @@ import org.fxmisc.richtext.model.StyleSpansBuilder;
 
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
+/**
+ * The Window class is the main window of the application.
+ */
 public class Window extends VBox {
 
-    private Label exerciseDescriptionLabel;
-    private Map<String, String> languageTextMap;
-    private Label resultLabel;
-    private List<Integer> numbers;
+    // Labels for exercise description, result and message
+    private final Label exerciseDescriptionLabel;
+    private final Map<String, String> languageTextMap;
+    private final Label resultLabel;
+    private final Label completionMessageLabel;
 
+    private boolean exercise5Completed = false;
+
+    // Array of keywords for syntax highlighting
     private static final String[] KEYWORDS = new String[]{
             "abstract", "boolean", "byte", "catch", "char", "class", "const", "debugger", "declare", "delete", "double", "echo", "elif",
             "export", "extends", "False", "final", "finally", "printf", "console.log", "float", "foreach", "function", "global", "if", "implements", "import", "include",
@@ -33,6 +44,7 @@ public class Window extends VBox {
             "unsigned", "use", "var", "void", "while", "with", "System.out.println", "int" , "def", "php"
     };
 
+    // Regular expression pattern for syntax highlighting
     private static final Pattern PATTERN = Pattern.compile(
             "(?<KEYWORD>" + String.join("|", KEYWORDS) + ")"
                     + "|(?<PAREN>\\(|\\))"
@@ -43,7 +55,20 @@ public class Window extends VBox {
                     + "|(?<COMMENT>//[^\n]*|/\\*(.|\\R)*?\\*/)"
     );
 
-    private void executeExercise(String code, String generateScriptPath, String correctionScriptPath, String selectedLanguage, Label resultLabel) throws IOException, InterruptedException {
+    /**
+     * This method is used for the Stdin/Stdout mode.
+     *
+     * @param code the code that is type by the user.
+     * @param generateScriptPath the script path to the python file who generates random numbers.
+     * @param correctionScriptPath the script path to the python file who makes the exercise.
+     * @param selectedLanguage the selected language.
+     * @param resultLabel the label for writing text in the window.
+     * @throws IOException if an I/O error occurs.
+     * @throws InterruptedException if the process is interrupted.
+     */
+    private void executeExerciseStdinStdout(String code, String generateScriptPath, String correctionScriptPath, String selectedLanguage, Label resultLabel) throws IOException, InterruptedException {
+        exerciseDescriptionLabel.setText("You can code freely by not choosing any exercise.");
+        // Create executors for generating random numbers and for correction
         StdinStdout generateExecutor = new StdinStdout(generateScriptPath);
         StdinStdout correctionExecutor = new StdinStdout(correctionScriptPath);
         List<Integer> numbers = generateExecutor.executeScript();
@@ -51,6 +76,7 @@ public class Window extends VBox {
         String result = "";
         String correctionResult = correctionExecutor.executeScriptWithArgs(numbers);
         switch (selectedLanguage) {
+            // Switch based on selected language to execute the code
             case "C":
                 CFile cFile = new CFile();
                 result = cFile.execute(code, numbers);
@@ -72,86 +98,202 @@ public class Window extends VBox {
                 result = javaFile.execute(code, numbers);
                 break;
             default:
-                resultLabel.setText("Langage non pris en charge");
+                resultLabel.setText("Language unknown.");
                 return;
         }
 
-        String finalResult = "Résultat de l'utilisateur: " + result + "\n"
-                + "Résultat de la correction : " + correctionResult + "\n";
+        // Display the final result message
+        String finalResult = "Result of the user : " + result + "\n"
+                + "Result of the correction : " + correctionResult + "\n";
         if (result.trim().equalsIgnoreCase(correctionResult.trim())) {
-            finalResult += ("Résultat correct.");
+            finalResult += ("Correct result.");
         } else {
-            finalResult += ("Pas correct.");
+            finalResult += ("Wrong result.");
         }
         resultLabel.setText(finalResult);
     }
 
-    public void executeExerciseInclude(String code, String generateScriptPath, String targetFilePath, String selectedLanguage, Label resultLabel) throws IOException {
+    /**
+     * This method execute a file in a selected language if an exercise isn't choose.
+     *
+     * @param code the code that is typed by the user.
+     * @param selectedLanguage the selected language.
+     * @throws IOException if an I/O errors occurs.
+     * @throws InterruptedException if the process is interrupted.
+     */
+    private void defaultExecute(String code, String selectedLanguage) throws IOException, InterruptedException {
+        String result = "";
+        List<Integer> numbers = new ArrayList<>();
+        // Switch based on selected language to execute the code
+        switch (selectedLanguage) {
+            case "C":
+                CFile cFile = new CFile();
+                result = cFile.execute(code, numbers);
+                break;
+            case "Python":
+                PythonFile pythonFile = new PythonFile();
+                result = pythonFile.execute(code, numbers);
+                break;
+            case "PHP":
+                PhpFile phpFile = new PhpFile();
+                result = phpFile.execute(code, numbers);
+                break;
+            case "JavaScript":
+                JavaScriptFile javaScriptFile = new JavaScriptFile();
+                result =  javaScriptFile.execute(code, numbers);
+                break;
+            case "Java":
+                JavaFile javaFile = new JavaFile();
+                result = javaFile.execute(code, numbers);
+                break;
+            default:
+                System.out.println("Please, select a language.");
+                break;
+        }
+        // Display the result with the result label
+        resultLabel.setText(result);
+    }
+
+    // HashMap used for the extension of the "include" exercise (here, this is exercise 5)
+    private static final Map<String, String> LANGUAGE_EXTENSIONS = new HashMap<>();
+
+    static {
+        LANGUAGE_EXTENSIONS.put("C", "c");
+        LANGUAGE_EXTENSIONS.put("Python", "py");
+        LANGUAGE_EXTENSIONS.put("Java", "java");
+        LANGUAGE_EXTENSIONS.put("PHP", "php");
+        LANGUAGE_EXTENSIONS.put("JavaScript", "js");
+    }
+
+    private final Map<String, Integer> exerciseCompletionCounts = new HashMap<>();
+
+    {
+        exerciseCompletionCounts.put("Calculer nombre de chiffre d'un entier", 0);
+    }
+
+    /**
+     * This method is used for the include mode.
+     *
+     * @param code the code that is type by the user.
+     * @param generateScriptPath the script path to the python file who generates random numbers.
+     * @param targetFilePath the main script, which contains the other part of the code.
+     * @param correctionPathFile the script path to the python file who makes the exercise.
+     * @param selectedLanguage the selected language.
+     * @param resultLabel the label for writing text in the window.
+     * @throws IOException if an I/O error occurs.
+     */
+    private void executeExerciseInclude(String code, String generateScriptPath, String targetFilePath, String correctionPathFile, String selectedLanguage, String selectedExercise, Label resultLabel) throws IOException {
         try {
-
-            System.out.println("Exécution de executeExerciseInclude avec le langage: " + selectedLanguage);
-
+            // Create executors for generating random numbers and for correction
             StdinStdout generateExecutor = new StdinStdout(generateScriptPath);
+            StdinStdout correctionExecutor = new StdinStdout(correctionPathFile);
+            // Generate random numbers
             List<Integer> numbers = generateExecutor.executeScript();
-
-            System.out.println("Nombres générés: " + numbers);
-
+            // Get the expected result from the correction script
+            String correctionResult = correctionExecutor.executeScriptWithArgs(numbers);
             String result = "";
+
+            // Determine file extension based on selected language
+            String fileExtension = LANGUAGE_EXTENSIONS.get(selectedLanguage);
+            if (fileExtension == null) {
+                resultLabel.setText("Unsupported language");
+                return;
+            }
+
+            // Adjust target file path with proper extension
+            targetFilePath = targetFilePath.replace("mainExo5", "mainExo5." + fileExtension);
+
+            // Switch case based on selected language
             switch (selectedLanguage) {
                 case "C":
                     CFile cFile = new CFile();
-                    cFile.writeResponseInFile(code);
+                    cFile.writeResponseInFile(code.trim() + "\n");
                     cFile.addContentToFile(targetFilePath);
 
-                    StdinStdout cExecutor = new StdinStdout(cFile.getPathFile());
-                    result = cExecutor.executeScriptWithArgs(numbers);
+                    Include cExecutor = new Include(cFile.getPathFile());
+                    result = cExecutor.executeScriptWithArgs("gcc", numbers);
+
+                    cFile.deleteTempFile();
                     break;
                 case "Python":
                     PythonFile pythonFile = new PythonFile();
-                    pythonFile.writeResponseInFile(code);
+                    pythonFile.writeResponseInFile(code.trim() + "\n");
                     pythonFile.addContentToFile(targetFilePath);
 
-                    StdinStdout pythonExecutor = new StdinStdout(pythonFile.getPathFile());
-                    result = pythonExecutor.executeScriptWithArgs(numbers);
+                    Include pythonExecutor = new Include(pythonFile.getPathFile());
+                    result = pythonExecutor.executeScriptWithArgs("python", numbers);
+
+                    pythonFile.deleteTempFile();
                     break;
                 case "PHP":
                     PhpFile phpFile = new PhpFile();
-                    phpFile.writeResponseInFile(code);
+                    phpFile.writeResponseInFile(code.trim() + "\n");
                     phpFile.addContentToFile(targetFilePath);
 
-                    StdinStdout phpExecutor = new StdinStdout(phpFile.getPathFile());
-                    result = phpExecutor.executeScriptWithArgs(numbers);
+                    Include phpExecutor = new Include(phpFile.getPathFile());
+                    result = phpExecutor.executeScriptWithArgs("php", numbers);
+                    phpFile.deleteTempFile();
                     break;
                 case "JavaScript":
-                    JavaScriptFile jsFile = new JavaScriptFile();
-                    jsFile.writeResponseInFile(code);
-                    jsFile.addContentToFile(targetFilePath);
+                    JavaScriptFile javascriptFile = new JavaScriptFile();
+                    javascriptFile.writeResponseInFile(code.trim() + "\n");
+                    javascriptFile.addContentToFile(targetFilePath);
 
-                    StdinStdout jsExecutor = new StdinStdout(jsFile.getPathFile());
-                    result = jsExecutor.executeScriptWithArgs(numbers);
+                    Include jsExecutor = new Include(javascriptFile.getPathFile());
+                    result = jsExecutor.executeScriptWithArgs("node", numbers);
+
+                    javascriptFile.deleteTempFile();
                     break;
                 case "Java":
                     JavaFile javaFile = new JavaFile();
-                    javaFile.writeResponseInFile(code);
+                    javaFile.writeResponseInFile(code.trim() + "\n");
                     javaFile.addContentToFile(targetFilePath);
 
-                    StdinStdout javaExecutor = new StdinStdout(javaFile.getPathFile());
-                    result = javaExecutor.executeScriptWithArgs(numbers);
+                    Include javaExecutor = new Include(javaFile.getPathFile());
+                    result = javaExecutor.executeScriptWithArgs("java", numbers);
+
+                    javaFile.deleteTempFile();
                     break;
                 default:
-                    resultLabel.setText("Langage non pris en charge");
-                    System.out.println("Langage non pris en charge");
+                    resultLabel.setText("Unknown language");
                     return;
             }
-            resultLabel.setText(result);
-            System.out.println("Résultat: " + result);
 
+            // If the user's result matches the correction result, update completion count and display a success message
+            if (result.trim().equalsIgnoreCase(correctionResult.trim())) {
+                int count = exerciseCompletionCounts.getOrDefault(selectedExercise, 0);
+                count++;
+                exerciseCompletionCounts.put(selectedExercise, count);
+                if (count > 1) {
+                    completionMessageLabel.setText("You have successfully completed this exercise " + count + " times !");
+                } else {
+                    completionMessageLabel.setText("You have successfully completed this exercise !");
+                }
+            } else {
+                exercise5Completed = false;
+                completionMessageLabel.setText("");
+            }
+
+            // Display the final result message
+            String finalResult = "Result of the user : " + result + "\n"
+                    + "Result of the correction : " + correctionResult + "\n";
+            if (result.trim().equalsIgnoreCase(correctionResult.trim())) {
+                finalResult += ("Correct result.");
+            } else {
+                finalResult += ("Wrong result.");
+            }
+            resultLabel.setText(finalResult);
         } catch (IOException e) {
-            resultLabel.setText("Erreur lors de l'exécution du code: " + e.getMessage());
+            resultLabel.setText("Error executing code : " + e.getMessage());
             e.printStackTrace();
         }
     }
 
+    /**
+     * Constructs a Window object with the specified spacing.
+     *
+     * @param spacing the spacing between elements in the window
+     */
     public Window(double spacing) {
         super(spacing);
         this.setAlignment(Pos.CENTER);
@@ -164,6 +306,8 @@ public class Window extends VBox {
         labelBox.getStyleClass().add("label-box");
         labelBox.setSpacing(10);
 
+        // Initialize labels and code input area
+        completionMessageLabel = new Label();
         exerciseDescriptionLabel = new Label();
         exerciseDescriptionLabel.setWrapText(true);
 
@@ -177,12 +321,14 @@ public class Window extends VBox {
         resultLabel = new Label();
         resultLabel.setWrapText(true);
 
+        // Initialize language and exercise selection menus
         MenuButton languageMenuButton = new MenuButton("Choisir un langage");
         MenuButton exerciseMenuButton = new MenuButton("Choisir un exercice");
 
+        // Initialize language options
         languageTextMap = new HashMap<>();
         languageTextMap.put("Java", "public class Main {\n\tpublic static void main(String[] args) {\n\t\tSystem.out.println(\"Hello, you chose Java!\");\n\t}\n}");
-        languageTextMap.put("Python", "def calculate_product(a, b):\n\treturn a * b\n\ndef main():\n\ta = int(input())\n\tb = int(input())\n\tresult = calculate_product(a, b)\n\tprint(result)\n\nif __name__ == \"__main__\":\n\tmain()");
+        languageTextMap.put("Python", "print(\"Hello, you choose Python\")");
         languageTextMap.put("JavaScript", "console.log(\"Hello, you chose JavaScript!\");");
         languageTextMap.put("C", "#include <stdio.h>\n\nint main() {\n\tprintf(\"Hello, you chose C!\");\n\treturn 0;\n}");
         languageTextMap.put("PHP", "<?php\n\techo \"Hello, you chose PHP!\";\n?>");
@@ -192,25 +338,33 @@ public class Window extends VBox {
             exerciseModel = new ExerciseModel();
             List<Pair<String, String>> exercisesAndLanguages = exerciseModel.getLanguagesForExercise();
 
+            // Add language options to the language selection menu
             for (String lang : languageTextMap.keySet()) {
                 MenuItem languageMenuItem = new MenuItem(lang);
                 languageMenuItem.setOnAction(event -> {
                     languageMenuButton.setText(lang);
                     codeInput.replaceText(languageTextMap.get(lang));
                     resultLabel.setText("");
-                    updateExerciseMenu(exerciseMenuButton, lang, exercisesAndLanguages, codeInput, resultLabel);
+                    // Update exercise menu based on selected language
+                    updateExerciseMenu(exerciseMenuButton, lang, exercisesAndLanguages, codeInput, resultLabel, completionMessageLabel);
+                    exercise5Completed = false;
+                    completionMessageLabel.setText("");
+
                 });
                 languageMenuButton.getItems().add(languageMenuItem);
             }
 
+            // Arrange the elements for display
             buttonsBox.getChildren().addAll(languageMenuButton, exerciseMenuButton);
             labelBox.getChildren().add(exerciseDescriptionLabel);
+            labelBox.getChildren().add(completionMessageLabel);
 
             VBox textAreaContainer = new VBox(codeInput);
             textAreaContainer.getStyleClass().add("text-area-container");
             textAreaContainer.setAlignment(Pos.CENTER);
             VBox.setVgrow(textAreaContainer, Priority.ALWAYS);
 
+            // Create submission box
             Button submitButton = new Button("Soumettre");
             submitButton.getStyleClass().add("button");
             submitButton.setOnAction(event -> {
@@ -219,52 +373,58 @@ public class Window extends VBox {
                 String selectedExercise = exerciseMenuButton.getText();
 
                 try {
+                    // Check the selected language
                     switch (selectedLanguage) {
+                        // If the selected language is C, Python, Java, PHP, or JavaScript
                         case "C", "Python", "Java", "PHP", "JavaScript":
+                            // Check the selected exercise
                             switch (selectedExercise) {
+                                // For each exercise, execute the corresponding method
                                 case "Produit de nombres entiers":
-                                    executeExercise(code, "C:\\Users\\FiercePC\\Desktop\\JavaProject\\CodYnGames\\correctionFile\\generateNumberExo1.py",
+                                    executeExerciseStdinStdout(code, "C:\\Users\\FiercePC\\Desktop\\JavaProject\\CodYnGames\\correctionFile\\generateNumberExo1.py",
                                             "C:\\Users\\FiercePC\\Desktop\\JavaProject\\CodYnGames\\correctionFile\\correctionExo1.py",
                                             selectedLanguage, resultLabel);
                                     break;
                                 case "Calcul d'une factorielle":
-                                    executeExercise(code, "C:\\Users\\FiercePC\\Desktop\\JavaProject\\CodYnGames\\correctionFile\\generateNumberExo2.py",
+                                    executeExerciseStdinStdout(code, "C:\\Users\\FiercePC\\Desktop\\JavaProject\\CodYnGames\\correctionFile\\generateNumberExo2.py",
                                             "C:\\Users\\FiercePC\\Desktop\\JavaProject\\CodYnGames\\correctionFile\\correctionExo2.py",
                                             selectedLanguage, resultLabel);
                                     break;
                                 case "Calcul d'une moyenne":
-                                    executeExercise(code, "C:\\Users\\FiercePC\\Desktop\\JavaProject\\CodYnGames\\correctionFile\\generateNumberExo3.py",
+                                    executeExerciseStdinStdout(code, "C:\\Users\\FiercePC\\Desktop\\JavaProject\\CodYnGames\\correctionFile\\generateNumberExo3.py",
                                             "C:\\Users\\FiercePC\\Desktop\\JavaProject\\CodYnGames\\correctionFile\\correctionExo3.py",
                                             selectedLanguage, resultLabel);
                                     break;
                                 case "Inverse d'un nombre":
-                                    executeExercise(code, "C:\\Users\\FiercePC\\Desktop\\JavaProject\\CodYnGames\\correctionFile\\generateNumberExo4.py",
+                                    executeExerciseStdinStdout(code, "C:\\Users\\FiercePC\\Desktop\\JavaProject\\CodYnGames\\correctionFile\\generateNumberExo4.py",
                                             "C:\\Users\\FiercePC\\Desktop\\JavaProject\\CodYnGames\\correctionFile\\correctionExo4.py",
                                             selectedLanguage, resultLabel);
                                     break;
                                 case "Calculer nombre de chiffre d'un entier":
                                     executeExerciseInclude(code, "C:\\Users\\FiercePC\\Desktop\\JavaProject\\CodYnGames\\correctionFile\\generateNumberExo4.py",
-                                            "C:\\Users\\FiercePC\\Desktop\\JavaProject\\CodYnGames\\mainInclude\\mainExo5.py",
-                                            selectedLanguage, resultLabel);
+                                            "C:\\Users\\FiercePC\\Desktop\\JavaProject\\CodYnGames\\mainInclude\\mainExo5",
+                                            "C:\\Users\\FiercePC\\Desktop\\JavaProject\\CodYnGames\\correctionFile\\correctionExo5.py",
+                                            selectedLanguage, selectedExercise, resultLabel);
                                     break;
                                 default:
-                                    resultLabel.setText("Veuillez choisir un exercice.");
+                                    defaultExecute(code, selectedLanguage);
                                     break;
                             }
                             break;
                         default:
-                            resultLabel.setText("Veuillez choisir un langage.");
+                            resultLabel.setText("Please, select a language.");
                     }
                 } catch (IOException | InterruptedException e) {
-                    resultLabel.setText("Erreur lors de l'exécution du code : " + e.getMessage());
+                    resultLabel.setText("Error executing the code : " + e.getMessage());
                     e.printStackTrace();
                 }
             });
 
             VBox submissionBox = new VBox(submitButton, resultLabel);
             submissionBox.setAlignment(Pos.CENTER);
-            submissionBox.setSpacing(10);
+            submissionBox.setSpacing(40);
 
+            // Add elements to the layout
             this.getChildren().addAll(buttonsBox, labelBox, textAreaContainer, submissionBox);
 
         } catch (SQLException | IOException | ClassNotFoundException | InterruptedException e) {
@@ -280,15 +440,26 @@ public class Window extends VBox {
         }
     }
 
-
-    private void updateExerciseMenu(MenuButton exerciseMenuButton, String selectedLanguage, List<Pair<String, String>> exercisesAndLanguages, CodeArea codeInput, Label resultLabel) {
+    /**
+     Updates the exercise menu with exercises available in the selected language.
+     @param exerciseMenuButton The button to display the exercises.
+     @param selectedLanguage The language chosen by the user.
+     @param exercisesAndLanguages A list of exercise titles and their associated languages.
+     @param codeInput The area where users input their code.
+     @param resultLabel The label to show exercise results.
+     @param completionMessageLabel The label to display completion messages.
+     */
+    private void updateExerciseMenu(MenuButton exerciseMenuButton, String selectedLanguage, List<Pair<String, String>> exercisesAndLanguages, CodeArea codeInput, Label resultLabel, Label completionMessageLabel) {
         exerciseMenuButton.getItems().clear();
         exerciseMenuButton.setText("Choisir un exercice");
+        String selectedExercise = exerciseMenuButton.getText();
+        exerciseCompletionCounts.put(selectedExercise, 0);
 
+        // Iterate the list of exercises and languages
         for (Pair<String, String> pair : exercisesAndLanguages) {
             String exerciseTitle = pair.getKey();
             String languages = pair.getValue();
-
+            // If the selected language is available for the exercise, add it to the menu
             if (languages.contains(selectedLanguage)) {
                 MenuItem exerciseMenuItem = new MenuItem(exerciseTitle);
                 exerciseMenuItem.setOnAction(event -> {
@@ -296,18 +467,25 @@ public class Window extends VBox {
                     updateExerciseDescription(exerciseTitle);
                     codeInput.clear();
                     resultLabel.setText("");
+                    exercise5Completed = false;
+                    completionMessageLabel.setText("");
                 });
                 exerciseMenuButton.getItems().add(exerciseMenuItem);
             }
         }
     }
 
+    /**
+     Updates the exercise description based on the chosen exercise.
+     @param exerciseTitle The title of the exercise.
+     */
     private void updateExerciseDescription(String exerciseTitle) {
         ExerciseModel exerciseModel = null;
         try {
             exerciseModel = new ExerciseModel();
             List<Pair<String, String>> exercisesAndDescriptions = exerciseModel.getExerciseDescription();
 
+            // Find the description for the selected exercise and update the label
             for (Pair<String, String> pair : exercisesAndDescriptions) {
                 if (pair.getKey().equals(exerciseTitle)) {
                     exerciseDescriptionLabel.setText(pair.getValue());
@@ -327,10 +505,16 @@ public class Window extends VBox {
         }
     }
 
+    /**
+     Highlights syntax in the provided text using predefined patterns.
+     @param text The text that will be highlighted.
+     @return Styled text with highlighted syntax.
+     */
     private static StyleSpans<Collection<String>> computeHighlighting(String text) {
         Matcher matcher = PATTERN.matcher(text);
         int lastKwEnd = 0;
         StyleSpansBuilder<Collection<String>> spansBuilder = new StyleSpansBuilder<>();
+        // Find patterns in the text and apply appropriate styles.
         while (matcher.find()) {
             String styleClass =
                     matcher.group("KEYWORD") != null ? "keyword" :
