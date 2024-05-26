@@ -1,79 +1,84 @@
 .root {
-
+    /* Centers the content */
     -fx-alignment: center;
 }
 
 .buttons-box {
+    /* Spacing between buttons and padding */
     -fx-spacing: 20px;
     -fx-padding: 15px;
 }
 
 .label-box {
+    /* Spacing between labels */
     -fx-spacing: 10px;
 }
 
 .text-area {
-    -fx-control-inner-background: #89CFF0;
-    -fx-pref-height: 600px;
-    -fx-max-width: 1800px;
+    /* Styling for code input area */
+    -fx-control-inner-background: #89CFF0; /* Background color */
+    -fx-pref-height: 400px; /* Preferred height */
+    -fx-max-width: 1600px; /* Maximum width */
 }
 
-
 .text-area-container {
-    -fx-alignment: center;
+    /* Aligns the text area to the bottom */
+    -fx-alignment: bottom;
 }
 
 .menu-button {
-    -fx-background-color: #89CFF0;
-    -fx-text-fill: white;
+    /* Styling for menu buttons */
+    -fx-background-color: #89CFF0; /* Background color */
+    -fx-text-fill: white; /* Text color */
     -fx-font-weight: bold;
-    -fx-background-radius: 6;
+    -fx-background-radius: 6; /* Rounded border */
 }
 
 .menu-button:hover {
-    -fx-background-color: #A4D3EE;
+    /* Hover effect for menu buttons */
+    -fx-background-color: #A4D3EE; /* Hover background color */
     -fx-font-weight: bold;
-    -fx-underline: true;
+    -fx-underline: true; /* Underline */
 }
 
 .button {
-    -fx-background-color: #89CFF0;
+    /* Styling for regular buttons */
+    -fx-background-color: #89CFF0; /* Background color */
     -fx-font-weight: bold;
-    -fx-background-radius: 6;
+    -fx-background-radius: 6; /* Rounded border */
 }
 
 .button:hover {
-    -fx-background-color: #A4D3EE;
+    /* Hover effect for regular buttons */
+    -fx-background-color: #A4D3EE; /* Hover background color */
     -fx-font-weight: bold;
-    -fx-underline: true;
+    -fx-underline: true; /* Underline */
 }
 
 .keyword {
-    -fx-fill: #0480eb;
+    /* Styling for keywords in code */
+    -fx-fill: #0480eb; /* Text color */
     -fx-font-weight: bold;
 }
 
-.paren {
-    -fx-fill: darkgray;
-}
-
-.brace {
-    -fx-fill: darkgray;
-}
-
-.bracket {
-    -fx-fill: darkgray;
-}
-
-.semicolon {
-    -fx-fill: darkgray;
+.paren, .brace, .bracket, .semicolon {
+    /* Styling for parentheses, braces, brackets, and semicolons in code */
+    -fx-fill: darkgray; /* Text color */
 }
 
 .string {
-    -fx-fill: #e40e0e;
+    /* Styling for strings in code */
+    -fx-fill: #e40e0e; /* Text color */
 }
 
 .comment {
-    -fx-fill: #4ee266;
+    /* Styling for comments in code */
+    -fx-fill: #4ee266; /* Text color */
     -fx-font-style: italic;
+}
+
+.label {
+    /* Styling for labels */
+    -fx-text-fill: black; /* Text color */
+    -fx-background-color: transparent; /* Background color */
 }
