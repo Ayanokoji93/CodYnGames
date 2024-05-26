@@ -28,12 +28,13 @@ public class StdinStdout {
     public List<Integer> executeScript() {
         List<Integer> numbers = new ArrayList<>();
         try {
+            // Execute the python file which generate numbers
             Process process = Runtime.getRuntime().exec("python " + scriptPath);
             BufferedReader numberReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
             BufferedReader errorReader = new BufferedReader(new InputStreamReader(process.getErrorStream()));
             String line;
 
-            // Read numbers from the script's output
+            // Read numbers from the output of the script
             while ((line = numberReader.readLine()) != null) {
                 String[] numberStrings = line.split(" ");
                 for (String numStr : numberStrings) {
@@ -89,6 +90,7 @@ public class StdinStdout {
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
+
         return output.toString();
     }
 }
