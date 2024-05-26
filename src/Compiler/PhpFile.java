@@ -10,7 +10,6 @@ import java.util.List;
  * execute it using a PHP interpreter, and manage temporary files.
  */
 public class PhpFile extends GeneralCompiler {
-    private String fileName;
 
     /**
      * Constructor that initializes a temporary file with the ".php" extension.
@@ -34,15 +33,12 @@ public class PhpFile extends GeneralCompiler {
     public String execute(String code, List<Integer> numbers) throws IOException, InterruptedException {
         writeResponseInFile(code);
 
-        // Path to the PHP executable
+        // Execute the PHP file
         String phpExecutable = "C:\\Users\\FiercePC\\Desktop\\php\\php.exe";
-
-        // Command to execute the PHP file
         List<String> command = new ArrayList<>();
         command.add(phpExecutable);
         command.add(getPathFile());
 
-        // Start the process
         ProcessBuilder pb = new ProcessBuilder(command);
         Process execProcess = pb.start();
 
@@ -63,10 +59,8 @@ public class PhpFile extends GeneralCompiler {
             }
         }
 
-        // Wait for the process to finish
         execProcess.waitFor();
 
-        // Delete the temporary file
         deleteTempFile();
 
         return output.toString();
