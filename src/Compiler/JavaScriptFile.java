@@ -9,10 +9,9 @@ import java.util.List;
  * execute it using Node.js, and manage temporary files.
  */
 public class JavaScriptFile extends GeneralCompiler {
-    private String fileName;
 
     /**
-     *Constructor that initializes a temporary file with the ".js" extension.
+     * Constructor that initializes a temporary file with the ".js" extension.
      *
      * @throws IOException if an I/O error occurs.
      */
@@ -25,7 +24,7 @@ public class JavaScriptFile extends GeneralCompiler {
      *
      * @param code the JavaScript code to execute.
      * @param numbers the list of numbers to pass as input to the program.
-     * @return the output of the executed program.
+     * @return the output of the executed program or the error output if an error occurs.
      * @throws IOException if an I/O error occurs.
      * @throws InterruptedException if the process execution is interrupted.
      */
@@ -33,13 +32,9 @@ public class JavaScriptFile extends GeneralCompiler {
     public String execute(String code, List<Integer> numbers) throws IOException, InterruptedException {
         writeResponseInFile(code);
 
-        // Path to the Node.js executable
-        String nodeExecutable = "C:\\Program Files\\nodejs\\node.exe";
-
-        // Command to execute the JavaScript file
-        String command = nodeExecutable + " " + getPathFileJs();
-
         // Execute the JavaScript file
+        String nodeExecutable = "C:\\Program Files\\nodejs\\node.exe ";
+        String command = nodeExecutable + getPathFileJs();
         Process execProcess = Runtime.getRuntime().exec(command);
 
         // Pass the list of numbers to the program as input
@@ -50,22 +45,47 @@ public class JavaScriptFile extends GeneralCompiler {
         }
         writer.close();
 
-        // Capture the output of the executed program
+        // Capture the standard output and error output of the executed program
         StringBuilder output = new StringBuilder();
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(execProcess.getInputStream()))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                output.append(line).append(System.lineSeparator());
-            }
-        }
+        StringBuilder errorOutput = new StringBuilder();
 
-        // Wait for the process to finish
+        Thread outputThread = new Thread(() -> {
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(execProcess.getInputStream()))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    output.append(line).append(System.lineSeparator());
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+
+        Thread errorThread = new Thread(() -> {
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(execProcess.getErrorStream()))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    errorOutput.append(line).append(System.lineSeparator());
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+
+        outputThread.start();
+        errorThread.start();
+
         execProcess.waitFor();
 
-        // Delete the temporary file
+        outputThread.join();
+        errorThread.join();
+
         deleteTempFile();
 
-        return output.toString();
+        if (errorOutput.length() > 0) {
+            return errorOutput.toString();
+        } else {
+            return output.toString();
+        }
     }
 
     /**
