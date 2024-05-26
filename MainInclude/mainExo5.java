@@ -6,4 +6,4 @@
         System.out.println("Le nombre de chiffres de " + n + " est " + result);
         scanner.close();
     }
-
+}
