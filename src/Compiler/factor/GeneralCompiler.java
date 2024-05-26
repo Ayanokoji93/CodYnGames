@@ -23,6 +23,7 @@ public abstract class GeneralCompiler {
 
     /**
      * Prompt the user to write a response and store it.
+     * These two following methods are never used for the moment. But they can be used for command lines directly.
      */
     public void askResponse(){
         Scanner scanner = new Scanner(System.in);
@@ -33,6 +34,15 @@ public abstract class GeneralCompiler {
             str.append(line).append("\n");
         }
         response = str.toString();
+    }
+
+    /**
+     * Get the stored response.
+     *
+     * @return the stored response.
+     */
+    public String getResponse(){
+        return this.response;
     }
 
     /**
@@ -60,14 +70,6 @@ public abstract class GeneralCompiler {
         }
     }
 
-    /**
-     * Get the stored response.
-     *
-     * @return the stored response.
-     */
-    public String getResponse(){
-        return this.response;
-    }
 
     /**
      * Get the absolute path of the temporary file.
@@ -93,7 +95,6 @@ public abstract class GeneralCompiler {
                 writer.newLine();
             }
         }
-        //deleteTempFile();
     }
 
     /**
