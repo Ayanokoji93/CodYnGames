@@ -47,7 +47,7 @@ public class CFile extends GeneralCompiler {
         String compileCommand = "C:\\Program Files\\mingw64\\bin\\gcc.exe -o C:\\Users\\FiercePC\\Desktop\\JavaProject\\CodYnGames\\tempFile\\tempExecutable " + getPathFile();
         Process compileProcess = Runtime.getRuntime().exec(compileCommand);
 
-        // Capture compilation errors
+        // This part display the errors of compilation
         BufferedReader compileErrorReader = new BufferedReader(new InputStreamReader(compileProcess.getErrorStream()));
         StringBuilder compileErrorOut = new StringBuilder();
         String line;
@@ -55,18 +55,16 @@ public class CFile extends GeneralCompiler {
             compileErrorOut.append(line).append("\n");
         }
         compileErrorReader.close();
-
-        // Wait for the compilation process to finish and check the result
         int compileResult = compileProcess.waitFor();
         if (compileResult != 0) {
             deleteTempFile();
             return "Compilation Error:\n" + compileErrorOut.toString();
         }
 
-        // Execute the compiled C program
+        // Execute the .exe program
         Process execProcess = Runtime.getRuntime().exec("C:\\Users\\FiercePC\\Desktop\\JavaProject\\CodYnGames\\tempFile\\tempExecutable");
 
-        // Pass the list of numbers to the program as input
+        // Pass the numbers list as parameter
         BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(execProcess.getOutputStream()));
         for (Integer number : numbers) {
             writer.write(number.toString());
@@ -74,7 +72,7 @@ public class CFile extends GeneralCompiler {
         }
         writer.close();
 
-        // Capture the output of the executed program
+        // This part display the input of the compilation
         StringBuilder inputOut = new StringBuilder();
         try (BufferedReader inputReader = new BufferedReader(new InputStreamReader(execProcess.getInputStream()))) {
             while ((line = inputReader.readLine()) != null) {
