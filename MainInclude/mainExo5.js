@@ -1,4 +1,14 @@
+function main() {
+    const rl = readline.createInterface({
+        input: process.stdin,
+        output: process.stdout
+    });
 
-n = parseInt(n);
-let result = countDigits(n);
-console.log(`Le nombre de chiffres de ${n} est ${result}`);
+    rl.question("", (input) => {
+        const number = parseInt(input, 10);
+            const result = countDigits(number);
+            console.log(`Le nombre de chiffres de ${number} est ${result}`);
+        rl.close();
+    });
+}
+main();
