@@ -10,8 +10,6 @@ import java.util.List;
  */
 public class PythonFile extends GeneralCompiler {
 
-    private String fileName;
-
     /**
      *Constructor that initializes a temporary file with the ".py" extension.
      *
@@ -19,11 +17,6 @@ public class PythonFile extends GeneralCompiler {
      */
     public PythonFile() throws IOException {
         super(".py");
-    }
-
-    public PythonFile(String fileName) throws IOException {
-        super(null);
-        this.fileName = fileName;
     }
 
     /**
@@ -39,7 +32,6 @@ public class PythonFile extends GeneralCompiler {
     public String execute(String code, List<Integer> numbers) throws IOException, InterruptedException {
         writeResponseInFile(code);
 
-        // Prepare the command to execute the Python file
         ProcessBuilder pb = new ProcessBuilder("python", getPathFile());
         pb.redirectErrorStream(true);
         Process execProcess = pb.start();
@@ -61,12 +53,12 @@ public class PythonFile extends GeneralCompiler {
             }
         }
 
-        // Wait for the process to finish
         execProcess.waitFor();
+
         deleteTempFile();
 
-        // Trim the output and return it
         String userResult = output.toString().trim();
+
         return userResult;
     }
 }
