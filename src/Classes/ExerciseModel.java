@@ -21,6 +21,7 @@ public class ExerciseModel {
      * @throws InterruptedException if the process is interrupted.
      */
     public ExerciseModel() throws SQLException, ClassNotFoundException, IOException, InterruptedException {
+        // Check if MySQL server is currently running, if not, establish a connection
         if (!isMySQLServerRunning()) {
             startMySQLServer();
         }
@@ -28,12 +29,13 @@ public class ExerciseModel {
     }
 
     /**
-     * Checks if the MySQL server is running by attempting to connect to the database.
+     * Checks if the MySQL server is running.
      *
      * @return true if the MySQL server is running, false otherwise.
      */
     private boolean isMySQLServerRunning() {
         try {
+            // Try to establish a connection to the database
             DriverManager.getConnection("jdbc:mysql://localhost:3306/exercises_db?useSSL=false", "root", "");
             return true;
         } catch (SQLException e) {
@@ -92,11 +94,14 @@ public class ExerciseModel {
         Statement statement = null;
         ResultSet resultSet = null;
         try {
+            // SQL query to join exercise titles and their descriptions
             String sqlQuery = "SELECT e.title, e.description FROM exercises e INNER JOIN " +
                     "(SELECT DISTINCT title FROM exercises) ex " +
                     "ON e.title = ex.title";
             statement = connection.createStatement();
             resultSet = statement.executeQuery(sqlQuery);
+
+            // Read the result set and add each title-description pair to the list
             while (resultSet.next()) {
                 String exerciseTitle = resultSet.getString("title");
                 String description = resultSet.getString("description");
@@ -124,11 +129,14 @@ public class ExerciseModel {
         Statement statement = null;
         ResultSet resultSet = null;
         try {
+            // SQL query to join exercise titles and their supported programming languages
             String sqlQuery = "SELECT e.title, e.code_languages FROM exercises e INNER JOIN " +
                     "(SELECT DISTINCT title FROM exercises) ex " +
                     "ON e.title = ex.title";
             statement = connection.createStatement();
             resultSet = statement.executeQuery(sqlQuery);
+
+            // Read the result set and add each title-language pair to the list
             while (resultSet.next()) {
                 String exerciseTitle = resultSet.getString("title");
                 String language = resultSet.getString("code_languages");
