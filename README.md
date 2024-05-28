@@ -30,6 +30,10 @@ Pour l'executer, il faut ensuite rentré cette commande :
 
 java Main
 
+NB : Nous avons rendu un projet avec une page souvrant en 1920x1080. Ceci est trop grand pour les
+ordinateur de l'école, ce qui affiche donc juste une page blanche. Il suffit de modifier les dimensions
+de la page dans le classe "Main" (ligne 16 et 17).
+
 
 Avec la contribution de :
 Axel COTTRANT
